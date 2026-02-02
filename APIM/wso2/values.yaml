@@ -1,0 +1,30 @@
+# WSO2 APIM 4.6.0 - values.yaml (template)
+# Ajustar claves exactas según chart de WSO2 usado.
+
+image:
+  # TODO: fijar tag 4.6.0
+  tag: "4.6.0"
+
+ingress:
+  enabled: true
+  hostname: apim-wso2.local
+  tls:
+    secretName: wso2-tls
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2Gi"
+  limits:
+    cpu: "2000m"
+    memory: "4Gi"
+
+# Vault Agent Injector (anotar deployments/pods en manifest del chart)
+# Ruta sugerida: /vault/secrets/
+# Archivo esperado: /vault/secrets/admin
+vault:
+  enabled: true
+  mountPath: /vault/secrets
+
+# TODO: configurar admin creds desde Vault (vía archivos inyectados)
+# TODO: configurar OIDC/JWT según IdP

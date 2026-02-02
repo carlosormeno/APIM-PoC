@@ -1,0 +1,35 @@
+# Gravitee APIM 4.10.3 - values.yaml (template)
+# Ajustar claves exactas según chart de Gravitee usado.
+
+image:
+  # TODO: fijar tag 4.10.3
+  tag: "4.10.3"
+
+ingress:
+  enabled: true
+  hosts:
+    - host: apim-gravitee.local
+      paths:
+        - /
+  tls:
+    - secretName: gravitee-tls
+      hosts:
+        - apim-gravitee.local
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2Gi"
+  limits:
+    cpu: "2000m"
+    memory: "4Gi"
+
+# Vault Agent Injector (anotar deployments/pods en manifest del chart)
+# Ruta sugerida: /vault/secrets/
+# Archivo esperado: /vault/secrets/admin
+vault:
+  enabled: true
+  mountPath: /vault/secrets
+
+# TODO: configurar admin creds desde Vault (vía archivos inyectados)
+# TODO: configurar OIDC/JWT según IdP
