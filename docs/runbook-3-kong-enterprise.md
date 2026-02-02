@@ -24,7 +24,7 @@ kubectl create ns apim-kong
 2. Preparar `values.yaml` con:
 - Ingress (host `apim-kong.local`, TLS)
 - Recursos (requests/limits)
- - Licencia desde Vault
+- Licencia desde Vault
 - Portal habilitado
 
 3. Inyectar secretos con Vault Agent Injector:
@@ -45,17 +45,30 @@ vault.hashicorp.com/agent-inject-template-license: |
 
 Ruta sugerida para archivos inyectados: `/vault/secrets/` (verificar en el chart).
 
-4. Instalar/actualizar:
+4. Renderizar manifests (Helm → YAML):
+```bash
+helm template kong kong/kong \
+  -n apim-kong \
+  -f APIM/kong/values.yaml \
+  > manifests/kong/rendered.yaml
+```
+
+5. Aplicar manifests:
+```bash
+kubectl apply -f manifests/kong/rendered.yaml
+```
+
+6. (Opcional) Instalar/actualizar con Helm:
 ```bash
 helm repo add kong https://charts.konghq.com
 helm repo update
 
 helm upgrade --install kong kong/kong \
   -n apim-kong \
-  -f values.yaml
+  -f APIM/kong/values.yaml
 ```
 
-5. Verificar:
+7. Verificar:
 ```bash
 kubectl -n apim-kong get pods,svc,ingress
 ```

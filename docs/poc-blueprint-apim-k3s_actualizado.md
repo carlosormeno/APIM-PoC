@@ -103,6 +103,14 @@ Definir y reportar **el mismo set de métricas** en los 3 productos:
 
 Recomendación: instalar k3s **sin Traefik** y luego instalar NGINX Ingress con Helm.
 
+### Enfoque híbrido (Helm + Manifests renderizados)
+Para asegurar reproducibilidad y trazabilidad:
+- Mantener `values.yaml` por producto en `APIM/<producto>/values.yaml`
+- Renderizar YAML estático con `helm template` en `manifests/<producto>/`
+- Aplicar con `kubectl apply`
+
+> Guía en `manifests/README.md`.
+
 ### Escenario con WAAP (ej. Fortinet) + API Protection
 Aunque el WAAP tenga módulo de **API Protection**, se mantiene **Ingress** entre WAAP y APIM por:
 - **Routing nativo en k8s** (Services/Pods).

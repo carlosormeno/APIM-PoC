@@ -50,7 +50,20 @@ vault.hashicorp.com/agent-inject-template-admin: |
 
 Ruta sugerida para archivos inyectados: `/vault/secrets/` (verificar en el chart).
 
-4. Instalar/actualizar:
+4. Renderizar manifests (Helm → YAML):
+```bash
+helm template gravitee gravitee/apim \
+  -n apim-gravitee \
+  -f APIM/gravitee/values.yaml \
+  > manifests/gravitee/rendered.yaml
+```
+
+5. Aplicar manifests:
+```bash
+kubectl apply -f manifests/gravitee/rendered.yaml
+```
+
+6. (Opcional) Instalar/actualizar con Helm:
 ```bash
 helm repo add gravitee https://helm.gravitee.io
 helm repo update
@@ -60,7 +73,7 @@ helm upgrade --install gravitee gravitee/apim \
   -f APIM/gravitee/values.yaml
 ```
 
-5. Verificar:
+7. Verificar:
 ```bash
 kubectl -n apim-gravitee get pods,svc,ingress
 ```

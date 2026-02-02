@@ -28,6 +28,15 @@ Regla: todo cambio/ajuste debe registrarse en el kit con fecha y hora.
 - `checklist.md` (Zero Trust B2B/B2C)
 - `test.md` (APIs de ejemplo y baseline de seguridad)
 
+## Enfoque híbrido (Helm + Manifests renderizados)
+Usamos Helm para parametrizar y **renderizamos YAML estático** para versionado.
+
+Ruta:
+- `APIM/<producto>/values.yaml`
+- `manifests/<producto>/rendered.yaml`
+
+Guía completa: `manifests/README.md`
+
 ## A) Preparar k3s (sin Traefik)
 
 ### A1) Reinstalar k3s (recomendado para evitar conflictos)

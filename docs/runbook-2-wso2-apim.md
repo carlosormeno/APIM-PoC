@@ -47,7 +47,20 @@ vault.hashicorp.com/agent-inject-template-admin: |
 
 Ruta sugerida para archivos inyectados: `/vault/secrets/` (verificar en el chart).
 
-4. Instalar/actualizar:
+4. Renderizar manifests (Helm → YAML):
+```bash
+helm template wso2apim wso2/wso2am \
+  -n apim-wso2 \
+  -f APIM/wso2/values.yaml \
+  > manifests/wso2/rendered.yaml
+```
+
+5. Aplicar manifests:
+```bash
+kubectl apply -f manifests/wso2/rendered.yaml
+```
+
+6. (Opcional) Instalar/actualizar con Helm:
 ```bash
 helm repo add wso2 https://helm.wso2.com
 helm repo update
@@ -57,7 +70,7 @@ helm upgrade --install wso2apim wso2/wso2am \
   -f APIM/wso2/values.yaml
 ```
 
-5. Verificar:
+7. Verificar:
 ```bash
 kubectl -n apim-wso2 get pods,svc,ingress
 ```
