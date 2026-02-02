@@ -188,9 +188,9 @@ helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
 kubectl create ns vault
 
-helm upgrade --install vault hashicorp/vault -n vault -f vault-values.yaml
+helm upgrade --install vault hashicorp/vault -n vault -f vault/vault-values.yaml
 ```
-Ejemplo de `vault-values.yaml` (prod‑like, RAFT 1 réplica):
+Ejemplo de `vault/vault-values.yaml` (prod‑like, RAFT 1 réplica):
 ```yaml
 global:
   tlsDisable: true
