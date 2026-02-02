@@ -181,6 +181,50 @@ Usar **Vault Agent Injector** (sidecar + templates) para inyectar secretos como 
 
 Regla: toda inyección debe quedar documentada en el `changes.log` con fecha/hora.
 
+### Cómo hacerlo (pasos mínimos)
+1) **Instalar Vault** (si no existe):
+```bash
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update
+kubectl create ns vault
+helm upgrade --install vault hashicorp/vault -n vault --set \"server.dev.enabled=true\"
+```
+> Para PoC rápida puedes usar `server.dev.enabled=true` (no producción). Si ya hay Vault corporativo, omite este paso.
+
+2) **Habilitar auth de Kubernetes** y crear role:
+```bash
+vault auth enable kubernetes
+vault write auth/kubernetes/config \\
+  token_reviewer_jwt=\"<jwt>\" \\
+  kubernetes_host=\"https://<k8s-api>\" \\
+  kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+vault write auth/kubernetes/role/apim-gravitee \\
+  bound_service_account_names=default \\
+  bound_service_account_namespaces=apim-gravitee \\
+  policies=apim-gravitee
+```
+
+3) **Crear policies y secretos**:
+```bash
+vault policy write apim-gravitee - <<'POL'
+path "kv/apim/gravitee/*" { capabilities = ["read"] }
+POL
+
+vault kv put kv/apim/gravitee/admin password="changeme"
+```
+
+4) **Habilitar Vault Agent Injector** (si no está activo):
+```bash
+helm upgrade --install vault-agent-injector hashicorp/vault \\
+  -n vault \\
+  --set injector.enabled=true \\
+  --set server.enabled=false
+```
+
+5) **Anotar deployments** del APIM con `vault.hashicorp.com/*` (ver runbooks 1–3).
+
+> Ajustar service accounts, namespaces y paths reales según tu entorno.
 > Si no hay Vault disponible, definir un plan temporal (y dejarlo documentado) para no bloquear la PoC.
 
 ## Paso 6) Observabilidad (Prometheus + Grafana + Loki + OpenTelemetry Collector)
