@@ -1,11 +1,16 @@
 # Runbook 0 – Base común del PoC (k3s + NGINX + TLS + Observabilidad + Backends + k6)
 
-> **Objetivo:** dejar lista la plataforma base común para ejecutar una PoC comparable de **API Management** en un nodo único **on‑prem** con **k3s**, usando **NGINX Ingress**, **dominio local (/etc/hosts)**, **TLS con cert-manager** y observabilidad con **Prometheus + Grafana + Loki + OpenTelemetry Collector**.  
-> **Nota:** Luego se instala **un APIM a la vez** (Gravitee → WSO2 → Kong Enterprise) para no sobrecargar la máquina (16 cores / 16 GB RAM).
+## 0) Alcance y resultado esperado
+Este runbook deja **lista la plataforma base** para ejecutar la PoC de APIM de forma comparable.  
+Resultado esperado: entorno k3s operativo con Ingress, TLS, observabilidad, backends y k6 listos.
+
+> Nota: Luego se instala **un APIM a la vez** (Gravitee → WSO2 → Kong Enterprise) para no sobrecargar la máquina (16 cores / 16 GB RAM).
 
 ---
 
-## Baseline de infraestructura (registrar)
+## 1) Pre‑requisitos y registros
+
+### 1.1) Baseline de infraestructura (registrar)
 
 Guarda estas versiones en el kit de evidencias:
 ```bash
@@ -15,7 +20,7 @@ helm version
 helm list -A
 ```
 
-## Kit de evidencias (crear estructura)
+### 1.2) Kit de evidencias (crear estructura)
 
 ```bash
 EVIDENCE_DATE=$(date +%F)
@@ -24,11 +29,11 @@ mkdir -p evidence/$EVIDENCE_DATE/{wso2,gravitee,kong}
 
 Regla: todo cambio/ajuste debe registrarse en el kit con fecha y hora.
 
-## Documentación base (leer antes de ejecutar)
+### 1.3) Documentación base (leer antes de ejecutar)
 - `checklist.md` (Zero Trust B2B/B2C)
 - `test.md` (APIs de ejemplo y baseline de seguridad)
 
-## Enfoque híbrido (Helm + Manifests renderizados)
+### 1.4) Enfoque híbrido (Helm + Manifests renderizados)
 Usamos Helm para parametrizar y **renderizamos YAML estático** para versionado.
 
 Ruta:
@@ -37,7 +42,7 @@ Ruta:
 
 Guía completa: `manifests/README.md`
 
-### Automatización (Makefile)
+#### Automatización (Makefile)
 Si Helm está instalado, puedes renderizar con:
 ```bash
 make render-gravitee
@@ -52,19 +57,23 @@ make apply-wso2
 make apply-kong
 ```
 
-### Qué busca este enfoque
+#### Qué busca este enfoque
 - **Trazabilidad:** el YAML final queda versionado.
 - **Reproducibilidad:** todos ejecutan los mismos manifiestos.
 - **Imparcialidad:** mismo flujo para cada APIM.
 
-### Qué ganamos
+#### Qué ganamos
 - Menos errores manuales.
 - Auditoría clara de cambios.
 - Re‑ejecución rápida en otra PC.
 
-## A) Preparar k3s (sin Traefik)
+---
 
-### A1) Reinstalar k3s (recomendado para evitar conflictos)
+## 2) Pasos de ejecución (en orden)
+
+## Paso 1) Preparar k3s (sin Traefik)
+
+### A1) Instalar / Reinstalar k3s (recomendado para evitar conflictos)
 ```bash
 sudo /usr/local/bin/k3s-uninstall.sh 2>/dev/null || true
 
@@ -81,7 +90,7 @@ kubectl get pods -A
 
 ---
 
-## B) Instalar NGINX Ingress Controller (NodePort)
+## Paso 2) Instalar NGINX Ingress Controller (NodePort)
 
 ```bash
 helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
@@ -113,7 +122,7 @@ echo "NODE_IP=$NODE_IP" && echo "HTTPS_NODEPORT=$HTTPS_NODEPORT"
 
 ---
 
-## C) Dominio local vía `/etc/hosts`
+## Paso 3) Dominio local vía `/etc/hosts`
 
 Obtén la IP del nodo:
 ```bash
@@ -131,7 +140,7 @@ EOF
 
 ---
 
-## D) TLS con cert-manager (self-signed)
+## Paso 4) TLS con cert-manager (self-signed)
 
 ### D1) Instalar cert-manager
 ```bash
@@ -157,7 +166,7 @@ YAML
 
 ---
 
-## E) Vault para secretos (obligatorio)
+## Paso 5) Vault para secretos (obligatorio)
 
 Usar Vault como **única fuente de secretos** (admin passwords, client secrets OIDC, licencias, etc.).  
 No se permiten otros secret stores. Si se requiere secret en Kubernetes, debe **derivarse desde Vault** y quedar documentado en el kit de evidencias.
@@ -174,7 +183,7 @@ Regla: toda inyección debe quedar documentada en el `changes.log` con fecha/hor
 
 > Si no hay Vault disponible, definir un plan temporal (y dejarlo documentado) para no bloquear la PoC.
 
-## F) Observabilidad (Prometheus + Grafana + Loki + OpenTelemetry Collector)
+## Paso 6) Observabilidad (Prometheus + Grafana + Loki + OpenTelemetry Collector)
 
 Crea namespace:
 ```bash
@@ -209,7 +218,7 @@ helm install otel open-telemetry/opentelemetry-collector   -n poc-observability
 
 ---
 
-## G) Exponer Grafana por Ingress (HTTPS)
+## Paso 7) Exponer Grafana por Ingress (HTTPS)
 
 1) Identifica el Service de Grafana:
 ```bash
@@ -253,7 +262,7 @@ kubectl -n poc-observability get secret kps-grafana   -o jsonpath='{.data.admin-
 
 ---
 
-## H) Backends de PoC (svc-fast / svc-slow / svc-error)
+## Paso 8) Backends de PoC (svc-fast / svc-slow / svc-error)
 
 Crea namespace:
 ```bash
@@ -276,7 +285,7 @@ kubectl -n poc-backends get pods,svc
 
 ---
 
-## I) LoadGen con k6 (desde dentro del clúster)
+## Paso 9) LoadGen con k6 (desde dentro del clúster)
 
 Crea namespace:
 ```bash
@@ -306,7 +315,7 @@ k6 run k6/s1-apikey.js -e BASE_URL=https://apim-wso2.local -e PATH=/fast -e API_
 
 ---
 
-## J) Regla de operación (para 16 GB RAM)
+## Paso 10) Regla de operación (para 16 GB RAM)
 
 Mantener siempre:
 - `poc-observability`
