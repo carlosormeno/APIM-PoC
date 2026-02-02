@@ -1,5 +1,6 @@
-# WSO2 APIM 4.6.0 - values.yaml (template)
-# Ajustar claves exactas según chart de WSO2 usado.
+# WSO2 APIM 4.6.0 - overrides (template)
+# Este archivo contiene solo overrides del chart oficial.
+# Base oficial: APIM/wso2/values.base.yaml (release all-in-one-4.6.0-1).
 
 image:
   # TODO: fijar tag 4.6.0

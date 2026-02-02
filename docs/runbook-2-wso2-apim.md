@@ -14,20 +14,20 @@
 
 ## 1) Instalación de WSO2 APIM (Helm)
 
-> Nota: usar **WSO2 APIM 4.6.0**. Fijar versión exacta del chart e imágenes en `values.yaml` y registrarlo en evidencias.
+> Nota: usar **WSO2 APIM 4.6.0**. El chart oficial es el release `all-in-one-4.6.0-1`. Mantener el `values.yaml` oficial como base y aplicar overrides en `APIM/wso2/values.yaml`. Registrar versión exacta del chart e imágenes en evidencias.
 
 1. Crear namespace:
 ```bash
 kubectl create ns apim-wso2
 ```
 
-2. Preparar `values.yaml` con:
+2. Preparar overrides en `APIM/wso2/values.yaml` con:
 - Ingress (host `apim-wso2.local`, TLS)
 - Recursos (requests/limits)
 - Admin creds desde Vault
 - Persistence (si aplica)
 
-Ruta sugerida: `APIM/wso2/values.yaml`
+Base oficial: `APIM/wso2/values.base.yaml`
 
 3. Inyectar secretos con Vault Agent Injector:
    - Anotar los pods/deployments con `vault.hashicorp.com/*`
@@ -51,6 +51,7 @@ Ruta sugerida para archivos inyectados: `/vault/secrets/` (verificar en el chart
 ```bash
 helm template wso2apim wso2/wso2am \
   -n apim-wso2 \
+  -f APIM/wso2/values.base.yaml \
   -f APIM/wso2/values.yaml \
   > manifests/wso2/rendered.yaml
 ```
@@ -67,6 +68,7 @@ helm repo update
 
 helm upgrade --install wso2apim wso2/wso2am \
   -n apim-wso2 \
+  -f APIM/wso2/values.base.yaml \
   -f APIM/wso2/values.yaml
 ```
 

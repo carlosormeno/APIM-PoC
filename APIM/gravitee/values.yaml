@@ -31,5 +31,31 @@ vault:
   enabled: true
   mountPath: /vault/secrets
 
-# TODO: configurar admin creds desde Vault (vía archivos inyectados)
-# TODO: configurar OIDC/JWT según IdP
+management:
+  additionalProperties:
+    security:
+      providers:
+        - type: memory
+          users:
+            - username: admin
+              password: ${file:/vault/secrets/admin}
+              roles: ORGANIZATION:ADMIN,ENVIRONMENT:ADMIN
+        - type: oidc
+          id: oidc
+          clientId: ${file:/vault/secrets/oidc_client_id}
+          clientSecret: ${file:/vault/secrets/oidc_client_secret}
+          authorizationEndpoint: https://idp.example.com/oauth2/authorize
+          tokenEndpoint: https://idp.example.com/oauth2/token
+          userInfoEndpoint: https://idp.example.com/oauth2/userinfo
+          jwkSetUri: https://idp.example.com/.well-known/jwks.json
+          issuer: https://idp.example.com/
+          scope: openid profile email
+          userMapping:
+            id: sub
+            email: email
+            firstname: given_name
+            lastname: family_name
+          roleMapping:
+            - condition: "{#jsonPath(#profile,'$.roles') contains 'admin'}"
+              roles: ORGANIZATION:ADMIN,ENVIRONMENT:ADMIN
+          syncMapping: true
