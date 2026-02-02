@@ -181,6 +181,8 @@ Usar **Vault Agent Injector** (sidecar + templates) para inyectar secretos como 
 
 Regla: toda inyección debe quedar documentada en el `changes.log` con fecha/hora.
 
+> Referencia rápida: `vault/README.md`
+
 ### Cómo hacerlo (pasos mínimos)
 1) **Instalar Vault** (modo prod‑like, si no existe):
 ```bash
