@@ -182,16 +182,58 @@ Usar **Vault Agent Injector** (sidecar + templates) para inyectar secretos como 
 Regla: toda inyección debe quedar documentada en el `changes.log` con fecha/hora.
 
 ### Cómo hacerlo (pasos mínimos)
-1) **Instalar Vault** (si no existe):
+1) **Instalar Vault** (modo prod‑like, si no existe):
 ```bash
 helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
 kubectl create ns vault
-helm upgrade --install vault hashicorp/vault -n vault --set \"server.dev.enabled=true\"
-```
-> Para PoC rápida puedes usar `server.dev.enabled=true` (no producción). Si ya hay Vault corporativo, omite este paso.
 
-2) **Habilitar auth de Kubernetes** y crear role:
+helm upgrade --install vault hashicorp/vault -n vault -f vault-values.yaml
+```
+Ejemplo de `vault-values.yaml` (prod‑like, RAFT 1 réplica):
+```yaml
+global:
+  tlsDisable: true
+
+server:
+  dev:
+    enabled: false
+
+  ha:
+    enabled: true
+    replicas: 1
+    raft:
+      enabled: true
+      setNodeId: true
+      config: |
+        ui = true
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+        storage "raft" {
+          path = "/vault/data"
+        }
+        service_registration "kubernetes" {}
+
+  dataStorage:
+    enabled: true
+    size: 5Gi
+    storageClass: local-path
+
+ui:
+  enabled: true
+```
+
+2) **Inicializar y unseal Vault**:
+```bash
+kubectl exec -n vault -it vault-0 -- vault operator init -key-shares=3 -key-threshold=2
+kubectl exec -n vault -it vault-0 -- vault operator unseal <unseal_key_1>
+kubectl exec -n vault -it vault-0 -- vault operator unseal <unseal_key_2>
+```
+
+3) **Habilitar auth de Kubernetes** y crear role:
 ```bash
 vault auth enable kubernetes
 vault write auth/kubernetes/config \\
@@ -205,7 +247,7 @@ vault write auth/kubernetes/role/apim-gravitee \\
   policies=apim-gravitee
 ```
 
-3) **Crear policies y secretos**:
+4) **Crear policies y secretos**:
 ```bash
 vault policy write apim-gravitee - <<'POL'
 path "kv/apim/gravitee/*" { capabilities = ["read"] }
@@ -214,7 +256,7 @@ POL
 vault kv put kv/apim/gravitee/admin password="changeme"
 ```
 
-4) **Habilitar Vault Agent Injector** (si no está activo):
+5) **Habilitar Vault Agent Injector** (si no está activo):
 ```bash
 helm upgrade --install vault-agent-injector hashicorp/vault \\
   -n vault \\
@@ -222,10 +264,10 @@ helm upgrade --install vault-agent-injector hashicorp/vault \\
   --set server.enabled=false
 ```
 
-5) **Anotar deployments** del APIM con `vault.hashicorp.com/*` (ver runbooks 1–3).
+6) **Anotar deployments** del APIM con `vault.hashicorp.com/*` (ver runbooks 1–3).
 
 > Ajustar service accounts, namespaces y paths reales según tu entorno.
-> Si no hay Vault disponible, definir un plan temporal (y dejarlo documentado) para no bloquear la PoC.
+> Si ya existe Vault corporativo, omite instalación/init y usa el endpoint provisto.
 
 ## Paso 6) Observabilidad (Prometheus + Grafana + Loki + OpenTelemetry Collector)
 
