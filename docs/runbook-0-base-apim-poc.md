@@ -45,6 +45,23 @@ make render-wso2
 make render-kong
 ```
 
+Aplicar manifests:
+```bash
+make apply-gravitee
+make apply-wso2
+make apply-kong
+```
+
+### Qué busca este enfoque
+- **Trazabilidad:** el YAML final queda versionado.
+- **Reproducibilidad:** todos ejecutan los mismos manifiestos.
+- **Imparcialidad:** mismo flujo para cada APIM.
+
+### Qué ganamos
+- Menos errores manuales.
+- Auditoría clara de cambios.
+- Re‑ejecución rápida en otra PC.
+
 ## A) Preparar k3s (sin Traefik)
 
 ### A1) Reinstalar k3s (recomendado para evitar conflictos)
