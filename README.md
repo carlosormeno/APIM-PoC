@@ -37,8 +37,8 @@ El objetivo es ser **lo más objetivos e imparciales posible**. Todas las plataf
 ---
 
 Para detalles técnicos, consultar:
-- `poc-blueprint-apim-k3s_actualizado.md`
-- `runbook-0-base-apim-poc.md`
-- `runbook-1-gravitee-apim.md`
-- `runbook-2-wso2-apim.md`
-- `runbook-3-kong-enterprise.md`
+- `docs/poc-blueprint-apim-k3s_actualizado.md`
+- `docs/runbook-0-base-apim-poc.md`
+- `docs/runbook-1-gravitee-apim.md`
+- `docs/runbook-2-wso2-apim.md`
+- `docs/runbook-3-kong-enterprise.md`
