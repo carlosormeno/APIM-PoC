@@ -37,6 +37,14 @@ Ruta:
 
 Guía completa: `manifests/README.md`
 
+### Automatización (Makefile)
+Si Helm está instalado, puedes renderizar con:
+```bash
+make render-gravitee
+make render-wso2
+make render-kong
+```
+
 ## A) Preparar k3s (sin Traefik)
 
 ### A1) Reinstalar k3s (recomendado para evitar conflictos)
