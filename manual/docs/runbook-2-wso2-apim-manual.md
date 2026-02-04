@@ -46,6 +46,11 @@ vault.hashicorp.com/agent-inject-template-admin: |
 
 Ruta sugerida para archivos inyectados: `/vault/secrets/` (verificar en el chart).
 
+Vault esperado:
+- `kv/apim/wso2/db` (password para WSO2 DBs)
+- `kv/apim/wso2/postgres` (password para Postgres)
+- `kv/apim/wso2/admin` (admin_password)
+
 4. Aplicar manifests:
 ```bash
 kubectl apply -f manual/manifests/wso2/

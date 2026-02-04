@@ -22,5 +22,8 @@ kubectl apply -f manual/manifests/wso2/
 Notas:
 - Ajustar `deployment.toml` en `10-configmap.yaml`.
 - PostgreSQL usa 2 DBs: `wso2_shared_db` y `wso2_apim_db`.
-- Reemplazar `CHANGE_ME` por credenciales reales (idealmente desde Vault).
+- Vault esperado:
+  - `kv/apim/wso2/db` (password)
+  - `kv/apim/wso2/postgres` (password)
+  - `kv/apim/wso2/admin` (admin_password)
 - Revisar recursos (CPU/RAM) segun tu nodo.

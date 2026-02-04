@@ -5,10 +5,7 @@ metadata:
   namespace: apim-wso2
 data:
   init.sql: |
-    CREATE DATABASE wso2_shared_db;
     CREATE DATABASE wso2_apim_db;
-
-    CREATE USER wso2 WITH ENCRYPTED PASSWORD 'CHANGE_ME';
 
     GRANT ALL PRIVILEGES ON DATABASE wso2_shared_db TO wso2;
     GRANT ALL PRIVILEGES ON DATABASE wso2_apim_db TO wso2;

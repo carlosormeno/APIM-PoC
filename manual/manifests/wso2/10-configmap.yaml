@@ -4,8 +4,8 @@ metadata:
   name: wso2apim-config
   namespace: apim-wso2
 data:
-  # TODO: ajustar deployment.toml segun tu entorno (DB externa, hostname, etc.)
-  deployment.toml: |
+  # TODO: ajustar deployment.toml.tpl segun tu entorno (DB externa, hostname, etc.)
+  deployment.toml.tpl: |
     [server]
     hostname = "apim-wso2.local"
     node_ip = "$env{NODE_IP}"
@@ -27,16 +27,16 @@ data:
     service_url = "https://localhost:${mgt.transport.https.port}/services/"
 
     [database.shared_db]
-    type = \"postgre\"
-    url = \"jdbc:postgresql://wso2-postgres.apim-wso2.svc.cluster.local:5432/wso2_shared_db\"
-    username = \"wso2\"
-    password = \"CHANGE_ME\"
+    type = "postgre"
+    url = "jdbc:postgresql://wso2-postgres.apim-wso2.svc.cluster.local:5432/wso2_shared_db"
+    username = "wso2"
+    password = "__DB_PASSWORD__"
 
     [database.apim_db]
-    type = \"postgre\"
-    url = \"jdbc:postgresql://wso2-postgres.apim-wso2.svc.cluster.local:5432/wso2_apim_db\"
-    username = \"wso2\"
-    password = \"CHANGE_ME\"
+    type = "postgre"
+    url = "jdbc:postgresql://wso2-postgres.apim-wso2.svc.cluster.local:5432/wso2_apim_db"
+    username = "wso2"
+    password = "__DB_PASSWORD__"
 
     [apim.analytics]
     enable = false

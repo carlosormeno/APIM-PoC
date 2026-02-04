@@ -12,6 +12,15 @@ spec:
     metadata:
       labels:
         app: wso2-postgres
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "apim-wso2"
+        vault.hashicorp.com/agent-pre-populate: "true"
+        vault.hashicorp.com/agent-inject-secret-postgres: "kv/apim/wso2/postgres"
+        vault.hashicorp.com/agent-inject-template-postgres: |
+          {{- with secret "kv/apim/wso2/postgres" -}}
+          {{ .Data.data.password }}
+          {{- end -}}
     spec:
       containers:
       - name: postgres
@@ -19,11 +28,11 @@ spec:
         imagePullPolicy: IfNotPresent
         env:
         - name: POSTGRES_USER
-          value: postgres
-        - name: POSTGRES_PASSWORD
-          value: CHANGE_ME
+          value: wso2
         - name: POSTGRES_DB
-          value: postgres
+          value: wso2_shared_db
+        - name: POSTGRES_PASSWORD_FILE
+          value: /vault/secrets/postgres
         ports:
         - containerPort: 5432
         volumeMounts:
