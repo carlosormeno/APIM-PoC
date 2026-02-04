@@ -63,6 +63,8 @@ kubectl apply -f manual/manifests/wso2/
 kubectl -n apim-wso2 get pods,svc,ingress
 ```
 
+> Post‑instalación: cuando el gateway tenga una API estable (`/health`), mover readiness/liveness probes a **8243**. Mantener `/services/Version` en 9443 solo durante instalación.
+
 ---
 
 ## 2) Configuración inicial
