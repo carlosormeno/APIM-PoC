@@ -40,3 +40,14 @@ data:
 
     [apim.analytics]
     enable = false
+
+    [keystore.tls]
+    file_name = "wso2carbon.p12"
+    type = "PKCS12"
+    password = "__KEYSTORE_PASSWORD__"
+    key_password = "__KEYSTORE_PASSWORD__"
+
+    [truststore]
+    file_name = "client-truststore.p12"
+    type = "PKCS12"
+    password = "__TRUSTSTORE_PASSWORD__"

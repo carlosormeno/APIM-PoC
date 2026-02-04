@@ -27,6 +27,8 @@ Notas:
   - `kv/apim/wso2/db` (password)
   - `kv/apim/wso2/postgres` (password)
   - `kv/apim/wso2/admin` (admin_password)
+  - `kv/apim/wso2/keystore` (file_b64, password)
+  - `kv/apim/wso2/truststore` (file_b64, password)
 - Revisar recursos (CPU/RAM) segun tu nodo.
 - Hostnames:
   - `apim-wso2.local` (UI/Management, 9443)

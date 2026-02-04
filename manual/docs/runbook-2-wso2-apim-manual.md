@@ -50,6 +50,8 @@ Vault esperado:
 - `kv/apim/wso2/db` (password para WSO2 DBs)
 - `kv/apim/wso2/postgres` (password para Postgres)
 - `kv/apim/wso2/admin` (admin_password)
+- `kv/apim/wso2/keystore` (file_b64, password)
+- `kv/apim/wso2/truststore` (file_b64, password)
 
 4. Aplicar manifests:
 ```bash
