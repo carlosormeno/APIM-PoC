@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wso2apim
+  namespace: apim-wso2
+  labels:
+    app: wso2apim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wso2apim
+  template:
+    metadata:
+      labels:
+        app: wso2apim
+      annotations:
+        # Vault Agent Injector (ajustar role y path)
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "apim-wso2"
+        vault.hashicorp.com/agent-inject-secret-admin: "kv/apim/wso2/admin"
+        vault.hashicorp.com/agent-inject-template-admin: |
+          {{- with secret "kv/apim/wso2/admin" -}}
+          admin_password={{ .Data.data.password }}
+          {{- end -}}
+    spec:
+      containers:
+      - name: wso2apim
+        image: wso2/wso2am:4.6.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9443
+          name: https
+        - containerPort: 8243
+          name: gateway-https
+        - containerPort: 8280
+          name: gateway-http
+        env:
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: JVM_MEM_OPTS
+          value: "-Xms2g -Xmx2g"
+        volumeMounts:
+        - name: config
+          mountPath: /home/wso2carbon/wso2-config-volume
+        resources:
+          requests:
+            cpu: "2000m"
+            memory: "4Gi"
+          limits:
+            cpu: "4000m"
+            memory: "6Gi"
+        readinessProbe:
+          httpGet:
+            path: /services/Version
+            port: 9443
+            scheme: HTTPS
+          initialDelaySeconds: 60
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /services/Version
+            port: 9443
+            scheme: HTTPS
+          initialDelaySeconds: 120
+          periodSeconds: 20
+      volumes:
+      - name: config
+        configMap:
+          name: wso2apim-config

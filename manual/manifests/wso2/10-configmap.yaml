@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wso2apim-config
+  namespace: apim-wso2
+data:
+  # TODO: ajustar deployment.toml segun tu entorno (DB externa, hostname, etc.)
+  deployment.toml: |
+    [server]
+    hostname = "apim-wso2.local"
+    node_ip = "$env{NODE_IP}"
+
+    [transport.https]
+    port = 9443
+
+    [apim.gateway.environment]
+    name = "Default"
+    type = "production"
+    display_in_api_console = true
+    description = "This is a hybrid gateway that handles both production and sandbox token traffic."
+
+    [[apim.gateway.environment]]
+    name = "Default"
+    type = "production"
+
+    [apim.key_manager]
+    service_url = "https://localhost:${mgt.transport.https.port}/services/"
+
+    [apim.analytics]
+    enable = false
