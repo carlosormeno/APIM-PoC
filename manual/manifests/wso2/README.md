@@ -13,6 +13,7 @@ Orden sugerido:
 - `20-deployment.yaml`
 - `30-service.yaml`
 - `40-ingress.yaml`
+- `41-ingress-gateway.yaml`
 
 Aplicar:
 ```bash
@@ -27,3 +28,6 @@ Notas:
   - `kv/apim/wso2/postgres` (password)
   - `kv/apim/wso2/admin` (admin_password)
 - Revisar recursos (CPU/RAM) segun tu nodo.
+- Hostnames:
+  - `apim-wso2.local` (UI/Management, 9443)
+  - `api-wso2.local` (Gateway, 8243)

@@ -56,7 +56,9 @@ Vault esperado:
 kubectl apply -f manual/manifests/wso2/
 ```
 
-5. Verificar:
+5. Actualizar `/etc/hosts` con `api-wso2.local` (gateway).
+
+6. Verificar:
 ```bash
 kubectl -n apim-wso2 get pods,svc,ingress
 ```
