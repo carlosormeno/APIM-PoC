@@ -22,9 +22,9 @@ kubectl create ns apim-gravitee
 ```
 
 2. Preparar manifests en `manual/manifests/gravitee/`:
+- MongoDB (auth desde Vault)
 - Deployments/Services/Ingress
 - Recursos (requests/limits)
-- Admin creds desde Vault
 - Persistence (si aplica)
 
 3. Inyectar secretos con Vault Agent Injector:
@@ -50,7 +50,12 @@ Ruta sugerida para archivos inyectados: `/vault/secrets/` (verificar en el chart
 kubectl apply -f manual/manifests/gravitee/
 ```
 
-5. Verificar:
+5. Actualizar `/etc/hosts` con:
+   - `apim-gravitee.local` (Console UI)
+   - `portal-gravitee.local` (Dev Portal)
+   - `api-gravitee.local` (Gateway)
+
+6. Verificar:
 ```bash
 kubectl -n apim-gravitee get pods,svc,ingress
 ```

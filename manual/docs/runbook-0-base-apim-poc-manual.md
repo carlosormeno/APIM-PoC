@@ -112,7 +112,7 @@ echo $NODE_IP
 Agrega en `/etc/hosts`:
 ```bash
 sudo tee -a /etc/hosts >/dev/null <<EOF
-$NODE_IP apim-wso2.local api-wso2.local apim-gravitee.local apim-kong.local
+$NODE_IP apim-wso2.local api-wso2.local apim-gravitee.local api-gravitee.local portal-gravitee.local apim-kong.local
 $NODE_IP grafana.local prometheus.local loki.local
 EOF
 ```
