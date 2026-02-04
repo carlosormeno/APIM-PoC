@@ -1,9 +1,9 @@
 # cert-manager (manual)
 
-Coloca aquí los YAMLs de cert-manager (CRDs + deployments + services).
+Instalación manual usando el manifest oficial de cert-manager:
+- `00-install.yaml` (CRDs + componentes)
 
-Sugerido:
-- `00-crds.yaml`
-- `10-namespace.yaml`
-- `20-deployment.yaml`
-- `30-service.yaml`
+Aplicar:
+```bash
+kubectl apply -f manual/manifests/base/cert-manager/00-install.yaml
+```

@@ -121,11 +121,12 @@ EOF
 
 ## Paso 4) TLS con cert-manager (self-signed)
 
-**Modo manual (YAML):** usar manifests en `manual/manifests/base/` y `manual/manifests/ingress/`.
+**Modo manual (YAML):** usar manifests en `manual/manifests/base/`.
+Versión actual del manifest: **cert-manager v1.19.3** (extraído del YAML descargado).
 
-Aplicar CRDs y componentes:
+Aplicar cert-manager (CRDs + componentes):
 ```bash
-kubectl apply -f manual/manifests/base/cert-manager/
+kubectl apply -f manual/manifests/base/cert-manager/00-install.yaml
 ```
 
 ClusterIssuer:
