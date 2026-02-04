@@ -72,19 +72,26 @@ spec:
           limits:
             cpu: "4000m"
             memory: "6Gi"
+        startupProbe:
+          httpGet:
+            path: /services/Version
+            port: 9443
+            scheme: HTTPS
+          failureThreshold: 30
+          periodSeconds: 10
         readinessProbe:
           httpGet:
             path: /services/Version
             port: 9443
             scheme: HTTPS
-          initialDelaySeconds: 60
+          initialDelaySeconds: 30
           periodSeconds: 15
         livenessProbe:
           httpGet:
             path: /services/Version
             port: 9443
             scheme: HTTPS
-          initialDelaySeconds: 120
+          initialDelaySeconds: 60
           periodSeconds: 20
       volumes:
       - name: config-template
