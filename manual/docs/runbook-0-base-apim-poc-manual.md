@@ -200,9 +200,17 @@ helm upgrade --install vault-agent-injector hashicorp/vault \\
 
 **Modo manual (YAML):** usar manifests en `manual/manifests/observability/`.
 
-Aplicar:
+Aplicar (orden recomendado):
 ```bash
-kubectl apply -f manual/manifests/observability/
+kubectl apply -f manual/manifests/observability/00-namespace.yaml
+kubectl apply -f manual/manifests/observability/prometheus/
+kubectl apply -f manual/manifests/observability/grafana/
+kubectl apply -f manual/manifests/observability/loki-configmap.yaml
+kubectl apply -f manual/manifests/observability/loki-deployment.yaml
+kubectl apply -f manual/manifests/observability/loki-service.yaml
+kubectl apply -f manual/manifests/observability/otel-configmap.yaml
+kubectl apply -f manual/manifests/observability/otel-deployment.yaml
+kubectl apply -f manual/manifests/observability/otel-service.yaml
 ```
 
 > Luego afinamos los manifests del collector para exporters (Prometheus/OTLP/Loki/otros) según lo que exponga cada APIM.
@@ -211,45 +219,13 @@ kubectl apply -f manual/manifests/observability/
 
 ## Paso 7) Exponer Grafana por Ingress (HTTPS)
 
-1) Identifica el Service de Grafana:
+1) Aplicar el Ingress manual:
 ```bash
-kubectl -n poc-observability get svc | grep grafana
+kubectl apply -f manual/manifests/observability/grafana/ingress.yaml
 ```
 
-2) Crea un Ingress (ajusta `service.name` si difiere; comúnmente es `kps-grafana`):
-```bash
-cat <<'YAML' | kubectl apply -f -
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: grafana
-  namespace: poc-observability
-  annotations:
-    cert-manager.io/cluster-issuer: selfsigned-issuer
-spec:
-  ingressClassName: nginx
-  tls:
-  - hosts:
-    - grafana.local
-    secretName: grafana-tls
-  rules:
-  - host: grafana.local
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: kps-grafana
-            port:
-              number: 80
-YAML
-```
-
-3) Credenciales de Grafana:
-```bash
-kubectl -n poc-observability get secret kps-grafana   -o jsonpath='{.data.admin-password}' | base64 -d; echo
-```
+2) Acceso por NodePort (alternativo):
+- Grafana: `http://<node-ip>:30300`
 
 ---
 
@@ -309,7 +285,7 @@ k6 run manual/k6/s1-apikey.js -e BASE_URL=https://apim-wso2.local -e PATH=/fast 
 ## Paso 10) Regla de operación (para 16 GB RAM)
 
 Mantener siempre:
-- `poc-observability`
+- `monitoring`
 - `poc-backends`
 - `poc-loadgen`
 
@@ -324,7 +300,7 @@ Antes de instalar cualquier APIM, verifica cuánto espacio real queda:
 kubectl top nodes
 free -h
 ```
-> Si `poc-observability` consume más de 4-5 GB, considera reducir la retención de Loki o el scrape interval de Prometheus para dejar espacio al APIM.
+> Si `monitoring` consume más de 4-5 GB, considera reducir la retención de Loki o el scrape interval de Prometheus para dejar espacio al APIM.
 
 ---
 

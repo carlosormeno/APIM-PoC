@@ -1,0 +1,51 @@
+# k8s/monitoring/prometheus/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      containers:
+      - name: prometheus
+        image: quay.io/prometheus/prometheus:v3.8.1
+        args:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus'
+        - '--storage.tsdb.retention.time=7d'
+        ports:
+        - containerPort: 9090
+          name: web
+        volumeMounts:
+        - name: config
+          mountPath: /etc/prometheus
+        - name: rules
+          mountPath: /etc/prometheus/rules
+        - name: storage
+          mountPath: /prometheus
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config
+      - name: rules
+        configMap:
+          name: prometheus-rules
+      - name: storage
+        persistentVolumeClaim:
+          claimName: prometheus-pvc

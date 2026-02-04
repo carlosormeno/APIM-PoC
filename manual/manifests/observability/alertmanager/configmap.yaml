@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/instance: alertmanager
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: alertmanager
+    app.kubernetes.io/version: v0.29.0
+    helm.sh/chart: alertmanager-1.29.0
+  annotations:
+    meta.helm.sh/release-name: alertmanager
+    meta.helm.sh/release-namespace: monitoring
+data:
+  alertmanager.yml: |
+    global: {}
+    route:
+      group_wait: 10s
+      group_interval: 5m
+      repeat_interval: 3h
+      receiver: general-monitor
+      routes:
+      - matchers:
+        - alertname=~"Spark.*"
+        receiver: spark-monitor
+      - matchers:
+        - alertname=~"Airflow.*"
+        receiver: general-monitor
+      - matchers:
+        - alertname=~"Minio.*"
+        receiver: general-monitor
+      - matchers:
+        - alertname=~"Trino.*"
+        receiver: general-monitor
+      - matchers:
+        - alertname=~"Nessie.*"
+        receiver: general-monitor
+      - matchers:
+        - alertname=~"Postgres.*"
+        receiver: general-monitor
+      - matchers:
+        - alertname=~"Vault.*"
+        receiver: general-monitor
+    receivers:
+    - name: default-receiver
+    - name: general-monitor
+      webhook_configs:
+      - url: http://alertmanager-receiver.monitoring.svc.cluster.local:5000/alert
+        send_resolved: true
+    - name: spark-monitor
+      webhook_configs:
+      - url: http://alertmanager-receiver.monitoring.svc.cluster.local:5000/alert
+        send_resolved: true
+    templates:
+    - /etc/alertmanager/*.tmpl

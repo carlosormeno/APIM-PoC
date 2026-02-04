@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager-receiver
+  namespace: monitoring
+  labels:
+    app: alertmanager-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager-receiver
+  template:
+    metadata:
+      labels:
+        app: alertmanager-receiver
+    spec:
+      containers:
+      - name: receiver
+        image: python:3.12-slim
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        command:
+        - python
+        - -u
+        - -c
+        - |
+          import json
+          from http.server import BaseHTTPRequestHandler, HTTPServer
+
+          class Handler(BaseHTTPRequestHandler):
+              def do_POST(self):
+                  length = int(self.headers.get("Content-Length", 0))
+                  body = self.rfile.read(length).decode("utf-8", errors="replace")
+                  print("alertmanager-receiver: nuevo payload", body, flush=True)
+                  self.send_response(200)
+                  self.end_headers()
+
+              def do_GET(self):
+                  self.send_response(200)
+                  self.end_headers()
+                  self.wfile.write(b"ok")
+
+              def log_message(self, format, *args):
+                  # Reduce noise al usar BaseHTTPRequestHandler
+                  return
+
+          server = HTTPServer(("", 5000), Handler)
+          print("alertmanager-receiver: escuchando en 0.0.0.0:5000", flush=True)
+          server.serve_forever()

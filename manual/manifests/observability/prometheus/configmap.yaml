@@ -1,0 +1,244 @@
+# k8s/monitoring/prometheus/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+    rule_files:
+    - /etc/prometheus/rules/*.rules
+    alerting:
+      alertmanagers:
+      - static_configs:
+        - targets: ['alertmanager.monitoring.svc.cluster.local:9093']
+    scrape_configs:
+    # ==============================
+    # Kubernetes control plane / nodes
+    # ==============================
+    - job_name: 'kubernetes-apiservers'
+      kubernetes_sd_configs:
+      - role: endpoints
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+
+    - job_name: 'kubernetes-nodes'
+      scheme: https
+      kubernetes_sd_configs:
+      - role: node
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics
+
+    - job_name: 'kubernetes-nodes-cadvisor'
+      scheme: https
+      kubernetes_sd_configs:
+      - role: node
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        insecure_skip_verify: true
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+    # ==============================
+    # Kubernetes services / pods (opt-in via annotations)
+    # ==============================
+    - job_name: 'kubernetes-service-endpoints'
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+        action: replace
+        target_label: __scheme__
+        regex: (https?)
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        target_label: service
+
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+        action: replace
+        target_label: __scheme__
+        regex: (https?)
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        target_label: namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        target_label: pod
+      # Drop puertos no HTTP de Loki (serf/memberlist)
+      - source_labels: [__meta_kubernetes_pod_label_app, __meta_kubernetes_pod_container_port_number]
+        regex: loki;(9095|7946)
+        action: drop
+
+    # ==============================
+    # Servicios clave de la plataforma
+    # ==============================
+    - job_name: 'minio'
+      metrics_path: /minio/v2/metrics/cluster
+      static_configs:
+      - targets: ['minio.bi-infra.svc.cluster.local:9000']
+        labels:
+          namespace: bi-infra
+          app: minio
+
+    - job_name: 'minio-bucket'
+      metrics_path: /minio/v2/metrics/bucket
+      static_configs:
+      - targets: ['minio.bi-infra.svc.cluster.local:9000']
+        labels:
+          namespace: bi-infra
+          app: minio
+
+    - job_name: 'postgres-exporter'
+      static_configs:
+      - targets: ['postgres-exporter.bi-infra.svc.cluster.local:9187']
+        labels:
+          namespace: bi-infra
+          app: postgresql
+
+    - job_name: 'airflow-statsd'
+      metrics_path: /metrics
+      static_configs:
+      - targets: ['statsd-exporter.bi-orchestration.svc.cluster.local:9102']
+        labels:
+          namespace: bi-orchestration
+          app: airflow
+
+    - job_name: 'spark-master'
+      metrics_path: /metrics/master
+      static_configs:
+      - targets: ['spark-master.bi-processing.svc.cluster.local:8080']
+        labels:
+          namespace: bi-processing
+          app: spark
+          component: master
+
+    - job_name: 'spark-worker'
+      metrics_path: /metrics/worker
+      static_configs:
+      - targets: ['spark-worker-metrics.bi-processing.svc.cluster.local:8081']
+        labels:
+          namespace: bi-processing
+          app: spark
+          component: worker
+
+    - job_name: 'spark-applications'
+      metrics_path: /metrics/applications
+      static_configs:
+      - targets: ['spark-master.bi-processing.svc.cluster.local:8080']
+        labels:
+          namespace: bi-processing
+          app: spark
+          component: applications
+
+    - job_name: 'hive-metastore'
+      static_configs:
+      - targets: ['hive-metastore.bi-governance.svc.cluster.local:9404']
+        labels:
+          namespace: bi-governance
+          app: hive-metastore
+
+    - job_name: 'trino-coordinator'
+      static_configs:
+      - targets: ['trino-coordinator.bi-processing.svc.cluster.local:9405']
+        labels:
+          namespace: bi-processing
+          app: trino
+
+    - job_name: 'mage-core'
+      metrics_path: /metrics
+      static_configs:
+      - targets: ['mage.bi-mage.svc.cluster.local:9101']
+        labels:
+          namespace: bi-mage
+          app: mage-core
+
+    - job_name: 'mage-bronze'
+      metrics_path: /metrics
+      static_configs:
+      - targets: ['mage-bronze.bi-mage.svc.cluster.local:9101']
+        labels:
+          namespace: bi-mage
+          app: mage-bronze
+
+    - job_name: 'mage-gold'
+      metrics_path: /metrics
+      static_configs:
+      - targets: ['mage-gold.bi-mage.svc.cluster.local:9101']
+        labels:
+          namespace: bi-mage
+          app: mage-gold
+    - job_name: 'nessie'
+      metrics_path: /q/metrics
+      static_configs:
+      - targets: ['nessie.bi-catalog.svc.cluster.local:9000']
+        labels:
+          namespace: bi-catalog
+          app: nessie
+    - job_name: 'vault'
+      metrics_path: /v1/sys/metrics
+      params:
+        format: ['prometheus']
+      static_configs:
+      - targets: ['vault.vault.svc.cluster.local:8200']
+        labels:
+          namespace: vault
+          app: vault
