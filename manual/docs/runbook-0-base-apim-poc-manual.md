@@ -200,10 +200,15 @@ helm upgrade --install vault-agent-injector hashicorp/vault \\
 
 **Modo manual (YAML):** usar manifests en `manual/manifests/observability/`.
 
-Aplicar (orden recomendado):
+Aplicar (orden recomendado, **Prometheus Operator**):
 ```bash
 kubectl apply -f manual/manifests/observability/00-namespace.yaml
-kubectl apply -f manual/manifests/observability/prometheus/
+kubectl apply -f manual/manifests/observability/prometheus-operator/bundle.yaml
+kubectl apply -f manual/manifests/observability/prometheus-operator/prometheus.yaml
+kubectl apply -f manual/manifests/observability/prometheus-operator/prometheus-service.yaml
+kubectl apply -f manual/manifests/observability/prometheus-operator/prometheus-rules.yaml
+kubectl apply -f manual/manifests/observability/prometheus-operator/servicemonitors/
+kubectl apply -f manual/manifests/observability/alertmanager/
 kubectl apply -f manual/manifests/observability/grafana/
 kubectl apply -f manual/manifests/observability/loki-configmap.yaml
 kubectl apply -f manual/manifests/observability/loki-deployment.yaml
@@ -212,6 +217,8 @@ kubectl apply -f manual/manifests/observability/otel-configmap.yaml
 kubectl apply -f manual/manifests/observability/otel-deployment.yaml
 kubectl apply -f manual/manifests/observability/otel-service.yaml
 ```
+
+Nota: no aplicar `manual/manifests/observability/prometheus/` cuando se usa el operator.
 
 > Luego afinamos los manifests del collector para exporters (Prometheus/OTLP/Loki/otros) según lo que exponga cada APIM.
 
