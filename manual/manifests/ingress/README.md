@@ -1,8 +1,18 @@
 # NGINX Ingress Controller (manual)
 
-Coloca aquí los YAMLs del Ingress Controller.
+YAMLs manuales listos para NodePort.
 
-Sugerido:
+Orden sugerido:
 - `00-namespace.yaml`
-- `10-controller-deployment.yaml`
-- `20-controller-service.yaml`
+- `10-serviceaccount.yaml`
+- `20-clusterrole.yaml`
+- `30-clusterrolebinding.yaml`
+- `40-configmap.yaml`
+- `50-deployment.yaml`
+- `60-service.yaml`
+- `70-ingressclass.yaml`
+
+Aplicar:
+```bash
+kubectl apply -f manual/manifests/ingress/
+```
