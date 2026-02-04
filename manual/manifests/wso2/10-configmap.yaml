@@ -26,5 +26,17 @@ data:
     [apim.key_manager]
     service_url = "https://localhost:${mgt.transport.https.port}/services/"
 
+    [database.shared_db]
+    type = \"postgre\"
+    url = \"jdbc:postgresql://wso2-postgres.apim-wso2.svc.cluster.local:5432/wso2_shared_db\"
+    username = \"wso2\"
+    password = \"CHANGE_ME\"
+
+    [database.apim_db]
+    type = \"postgre\"
+    url = \"jdbc:postgresql://wso2-postgres.apim-wso2.svc.cluster.local:5432/wso2_apim_db\"
+    username = \"wso2\"
+    password = \"CHANGE_ME\"
+
     [apim.analytics]
     enable = false

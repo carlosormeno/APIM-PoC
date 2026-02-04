@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wso2-postgres
+  namespace: apim-wso2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wso2-postgres
+  template:
+    metadata:
+      labels:
+        app: wso2-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: CHANGE_ME
+        - name: POSTGRES_DB
+          value: postgres
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: init
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: wso2-postgres-pvc
+      - name: init
+        configMap:
+          name: wso2-postgres-init
+          items:
+          - key: init.sql
+            path: init.sql

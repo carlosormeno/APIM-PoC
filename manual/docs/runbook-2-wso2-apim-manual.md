@@ -22,6 +22,7 @@ kubectl create ns apim-wso2
 ```
 
 2. Preparar manifests en `manual/manifests/wso2/`:
+- PostgreSQL (2 DBs: `wso2_shared_db` y `wso2_apim_db`)
 - Deployments/Services/Ingress
 - Recursos (requests/limits)
 - Admin creds desde Vault
