@@ -107,6 +107,8 @@ Implementar todas las APIs de `manual/test.md`:
 - IP allow/deny (si aplica)
 - CORS + headers (X-Request-ID)
 
+> Hardening opcional: NetworkPolicies y/o mTLS interno. Documentar si se aplica.
+
 ---
 
 ## 6) Smoke tests
