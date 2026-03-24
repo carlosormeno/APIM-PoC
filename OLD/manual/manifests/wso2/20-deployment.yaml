@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wso2apim
+  namespace: apim-wso2
+  labels:
+    app: wso2apim
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wso2apim
+  template:
+    metadata:
+      labels:
+        app: wso2apim
+      annotations:
+        # Vault Agent Injector (ajustar role y path)
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "apim-wso2"
+        vault.hashicorp.com/agent-pre-populate: "true"
+        vault.hashicorp.com/agent-inject-secret-admin: "kv/apim/wso2/admin"
+        vault.hashicorp.com/agent-inject-template-admin: |
+          {{- with secret "kv/apim/wso2/admin" -}}
+          admin_password={{ .Data.data.password }}
+          {{- end -}}
+        vault.hashicorp.com/agent-inject-secret-db: "kv/apim/wso2/db"
+        vault.hashicorp.com/agent-inject-template-db: |
+          {{- with secret "kv/apim/wso2/db" -}}
+          {{ .Data.data.password }}
+          {{- end -}}
+        vault.hashicorp.com/agent-inject-secret-keystore: "kv/apim/wso2/keystore"
+        vault.hashicorp.com/agent-inject-template-keystore: |
+          {{- with secret "kv/apim/wso2/keystore" -}}
+          {{ .Data.data.file_b64 }}
+          {{- end -}}
+        vault.hashicorp.com/agent-inject-secret-truststore: "kv/apim/wso2/truststore"
+        vault.hashicorp.com/agent-inject-template-truststore: |
+          {{- with secret "kv/apim/wso2/truststore" -}}
+          {{ .Data.data.file_b64 }}
+          {{- end -}}
+        vault.hashicorp.com/agent-inject-secret-keystore-password: "kv/apim/wso2/keystore"
+        vault.hashicorp.com/agent-inject-template-keystore-password: |
+          {{- with secret "kv/apim/wso2/keystore" -}}
+          {{ .Data.data.password }}
+          {{- end -}}
+        vault.hashicorp.com/agent-inject-secret-truststore-password: "kv/apim/wso2/truststore"
+        vault.hashicorp.com/agent-inject-template-truststore-password: |
+          {{- with secret "kv/apim/wso2/truststore" -}}
+          {{ .Data.data.password }}
+          {{- end -}}
+    spec:
+      initContainers:
+      - name: render-config
+        image: alpine:3.20
+        command:
+          - sh
+          - -c
+          - |
+            DB_PW=$(cat /vault/secrets/db)
+            KS_PW=$(cat /vault/secrets/keystore-password)
+            TS_PW=$(cat /vault/secrets/truststore-password)
+            sed "s/__DB_PASSWORD__/${DB_PW}/g; s/__KEYSTORE_PASSWORD__/${KS_PW}/g; s/__TRUSTSTORE_PASSWORD__/${TS_PW}/g" /config-template/deployment.toml.tpl > /config/deployment.toml
+            base64 -d /vault/secrets/keystore > /keystores/wso2carbon.p12
+            base64 -d /vault/secrets/truststore > /keystores/client-truststore.p12
+        volumeMounts:
+        - name: config-template
+          mountPath: /config-template
+        - name: config
+          mountPath: /config
+        - name: keystores
+          mountPath: /keystores
+      containers:
+      - name: wso2apim
+        image: wso2/wso2am:4.6.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9443
+          name: https
+        - containerPort: 8243
+          name: gateway-https
+        - containerPort: 8280
+          name: gateway-http
+        env:
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+        - name: JVM_MEM_OPTS
+          value: "-Xms2g -Xmx2g"
+        volumeMounts:
+        - name: config
+          mountPath: /home/wso2carbon/wso2-config-volume
+        - name: keystores
+          mountPath: /home/wso2carbon/wso2-config-volume/repository/resources/security
+        resources:
+          requests:
+            cpu: "2000m"
+            memory: "4Gi"
+          limits:
+            cpu: "4000m"
+            memory: "6Gi"
+        startupProbe:
+          httpGet:
+            path: /services/Version
+            port: 9443
+            scheme: HTTPS
+          failureThreshold: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /services/Version
+            port: 9443
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            path: /services/Version
+            port: 9443
+            scheme: HTTPS
+          initialDelaySeconds: 60
+          periodSeconds: 20
+      volumes:
+      - name: config-template
+        configMap:
+          name: wso2apim-config
+      - name: config
+        emptyDir: {}
+      - name: keystores
+        emptyDir: {}

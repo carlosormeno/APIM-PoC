@@ -86,6 +86,96 @@ Implementar todas las APIs de `manual/test.md`:
 
 > Usar backends en `poc-backends` y documentar endpoints reales.
 
+### Variante valida en PoC: importacion desde Swagger remoto
+Si ya tienes OpenAPI expuesto por backend (ejemplo):
+- `http://10.50.129.101:5511/v3/api-docs`
+
+En Publisher:
+1. `Create API` -> `Import Open API` (URL remota)
+2. Definir `Context` y `Version`
+3. Ajustar endpoint backend (`Production`/`Sandbox`) a:
+   - `http://10.50.129.101:5511`
+4. Crear revision, desplegar en gateway `Default` y publicar.
+
+### Caso especial: backend con token propio + token APIM
+Si el backend exige su propio Bearer token ademas del token de APIM:
+
+1. En `Runtime` cambiar `Authorization Header` a:
+   - `X-APIM-Authorization`
+
+2. Invocar API con dos headers:
+   - `X-APIM-Authorization: Bearer <token_apim>`
+   - `Authorization: Bearer <token_backend>`
+
+3. Crear nueva revision y desplegar luego del cambio de Runtime.
+
+Nota:
+- `900902` indica que APIM no recibio credencial en el header esperado.
+- `900901` indica token APIM invalido/expirado.
+
+### Caso especial: DB APIM sin tablas despues de reinicio
+Si luego de reiniciar WSO2 no ves APIs y la DB esta vacia (sin tablas):
+
+1. Verificar si hay tablas en `wso2_apim_db`:
+```bash
+kubectl -n apim-wso2 exec -it deploy/wso2-postgres -- \
+  psql -U wso2 -d wso2_apim_db -c "\dt"
+```
+
+2. Si no hay tablas, ejecutar los dbscripts oficiales (PostgreSQL):
+```bash
+# Shared DB
+kubectl -n apim-wso2 exec -it deploy/wso2apim -- \
+  cat /home/wso2carbon/wso2am-4.6.0/dbscripts/postgresql.sql \
+| kubectl -n apim-wso2 exec -i deploy/wso2-postgres -- \
+  psql -U wso2 -d wso2_shared_db -f /dev/stdin
+
+# APIM DB
+kubectl -n apim-wso2 exec -it deploy/wso2apim -- \
+  cat /home/wso2carbon/wso2am-4.6.0/dbscripts/apimgt/postgresql.sql \
+| kubectl -n apim-wso2 exec -i deploy/wso2-postgres -- \
+  psql -U wso2 -d wso2_apim_db -f /dev/stdin
+```
+
+3. Reiniciar WSO2:
+```bash
+kubectl -n apim-wso2 rollout restart deploy wso2apim
+```
+
+### Regenerar token APIM por cURL (client_credentials)
+Cuando expire el token APIM, se puede regenerar sin usar la UI:
+
+1. Obtener `consumer key` y `consumer secret` de la aplicacion en Dev Portal.
+2. Generar `Basic` en base64 y pedir token:
+
+```bash
+CK='CONSUMER_KEY'
+CS='CONSUMER_SECRET'
+B64=$(printf '%s:%s' "$CK" "$CS" | base64 -w0)
+
+curl -k -X POST 'https://apim-wso2.local:30443/oauth2/token' \
+  -H "Authorization: Basic $B64" \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=client_credentials'
+```
+
+3. Para extraer solo `access_token`:
+
+```bash
+TOKEN=$(curl -ks -X POST 'https://apim-wso2.local:30443/oauth2/token' \
+  -H "Authorization: Basic $B64" \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'grant_type=client_credentials' | jq -r '.access_token')
+
+echo "$TOKEN"
+```
+
+Uso en invocacion:
+
+```bash
+-H "X-APIM-Authorization: Bearer $TOKEN"
+```
+
 ---
 
 ## 4) Segmentación B2B/B2C (obligatorio)

@@ -12,8 +12,7 @@ data:
           http:
 
     exporters:
-      logging:
-        loglevel: info
+      debug: {}
       prometheus:
         endpoint: 0.0.0.0:9464
 
@@ -21,10 +20,10 @@ data:
       pipelines:
         metrics:
           receivers: [otlp]
-          exporters: [prometheus, logging]
+          exporters: [prometheus, debug]
         traces:
           receivers: [otlp]
-          exporters: [logging]
+          exporters: [debug]
         logs:
           receivers: [otlp]
-          exporters: [logging]
+          exporters: [debug]

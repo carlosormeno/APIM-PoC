@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spark-worker
+  namespace: monitoring
+  labels:
+    monitoring: "true"
+spec:
+  namespaceSelector:
+    matchNames:
+      - bi-processing
+  selector:
+    matchLabels:
+      app: spark-worker
+      component: metrics
+  endpoints:
+    - port: metrics
+      path: /metrics/worker
+      interval: 30s

@@ -8,4 +8,4 @@ spec:
     app: gravitee-console
   ports:
   - port: 8084
-    targetPort: 8084
+    targetPort: 8080

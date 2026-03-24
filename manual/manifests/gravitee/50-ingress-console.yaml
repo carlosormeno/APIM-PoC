@@ -5,6 +5,9 @@ metadata:
   namespace: apim-gravitee
   annotations:
     cert-manager.io/cluster-issuer: selfsigned-issuer
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header X-Forwarded-Host $host:31443;
+      proxy_set_header X-Forwarded-Port 31443;
 spec:
   ingressClassName: nginx
   tls:
@@ -15,6 +18,13 @@ spec:
   - host: apim-gravitee.local
     http:
       paths:
+      - path: /management
+        pathType: Prefix
+        backend:
+          service:
+            name: gravitee-management-api
+            port:
+              number: 8083
       - path: /
         pathType: Prefix
         backend:

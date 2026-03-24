@@ -15,10 +15,10 @@ spec:
     spec:
       containers:
       - name: portal
-        image: graviteeio/apim-portal:4.10.3
+        image: graviteeio/apim-portal-ui:4.10.3
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8085
+        - containerPort: 8080
         env:
         - name: MGMT_API_URL
           value: "http://gravitee-management-api.apim-gravitee.svc.cluster.local:8083"

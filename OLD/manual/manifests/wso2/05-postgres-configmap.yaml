@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wso2-postgres-init
+  namespace: apim-wso2
+data:
+  init.sql: |
+    CREATE DATABASE wso2_apim_db;
+
+    GRANT ALL PRIVILEGES ON DATABASE wso2_shared_db TO wso2;
+    GRANT ALL PRIVILEGES ON DATABASE wso2_apim_db TO wso2;

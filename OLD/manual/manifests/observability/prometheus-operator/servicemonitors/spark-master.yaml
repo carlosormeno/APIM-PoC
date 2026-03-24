@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spark-master
+  namespace: monitoring
+  labels:
+    monitoring: "true"
+spec:
+  namespaceSelector:
+    matchNames:
+      - bi-processing
+  selector:
+    matchLabels:
+      app: spark-master
+  endpoints:
+    - port: web-ui
+      path: /metrics/master
+      interval: 30s
+    - port: web-ui
+      path: /metrics/applications
+      interval: 30s

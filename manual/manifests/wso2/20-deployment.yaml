@@ -18,6 +18,7 @@ spec:
         # Vault Agent Injector (ajustar role y path)
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "apim-wso2"
+        vault.hashicorp.com/agent-init-first: "true"
         vault.hashicorp.com/agent-pre-populate: "true"
         vault.hashicorp.com/agent-inject-secret-admin: "kv/apim/wso2/admin"
         vault.hashicorp.com/agent-inject-template-admin: |
@@ -50,6 +51,13 @@ spec:
           {{ .Data.data.password }}
           {{- end -}}
     spec:
+      hostAliases:
+      - ip: "10.43.106.116"
+        hostnames:
+        - "apim-wso2.local"
+      - ip: "172.16.14.185"
+        hostnames:
+        - "api-wso2.local"
       initContainers:
       - name: render-config
         image: alpine:3.20
@@ -58,9 +66,11 @@ spec:
           - -c
           - |
             DB_PW=$(cat /vault/secrets/db)
+            ADMIN_PW=$(awk -F= '/^admin_password=/{print $2}' /vault/secrets/admin)
             KS_PW=$(cat /vault/secrets/keystore-password)
             TS_PW=$(cat /vault/secrets/truststore-password)
-            sed "s/__DB_PASSWORD__/${DB_PW}/g; s/__KEYSTORE_PASSWORD__/${KS_PW}/g; s/__TRUSTSTORE_PASSWORD__/${TS_PW}/g" /config-template/deployment.toml.tpl > /config/deployment.toml
+            mkdir -p /config/repository/conf
+            sed "s/__DB_PASSWORD__/${DB_PW}/g; s/__ADMIN_PASSWORD__/${ADMIN_PW}/g; s/__KEYSTORE_PASSWORD__/${KS_PW}/g; s/__TRUSTSTORE_PASSWORD__/${TS_PW}/g" /config-template/deployment.toml.tpl > /config/repository/conf/deployment.toml
             base64 -d /vault/secrets/keystore > /keystores/wso2carbon.p12
             base64 -d /vault/secrets/truststore > /keystores/client-truststore.p12
         volumeMounts:

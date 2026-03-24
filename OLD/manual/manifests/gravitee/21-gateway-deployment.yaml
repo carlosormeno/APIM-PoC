@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gravitee-gateway
+  namespace: apim-gravitee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gravitee-gateway
+  template:
+    metadata:
+      labels:
+        app: gravitee-gateway
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "apim-gravitee"
+        vault.hashicorp.com/agent-pre-populate: "true"
+        vault.hashicorp.com/agent-inject-secret-mongo: "kv/apim/gravitee/mongo"
+        vault.hashicorp.com/agent-inject-template-mongo: |
+          {{- with secret "kv/apim/gravitee/mongo" -}}
+          {{ .Data.data.password }}
+          {{- end -}}
+    spec:
+      initContainers:
+      - name: render-config
+        image: alpine:3.20
+        command:
+          - sh
+          - -c
+          - |
+            MONGO_PW=$(cat /vault/secrets/mongo)
+            sed "s/__MONGO_PASSWORD__/${MONGO_PW}/g" /config-template/gravitee.yml.tpl > /config/gravitee.yml
+        volumeMounts:
+        - name: config-template
+          mountPath: /config-template
+        - name: config
+          mountPath: /config
+      containers:
+      - name: gateway
+        image: graviteeio/apim-gateway:4.10.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8082
+        volumeMounts:
+        - name: config
+          mountPath: /graviteeio-gateway/config
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 1
+            memory: 2Gi
+      volumes:
+      - name: config-template
+        configMap:
+          name: gravitee-gateway-config
+      - name: config
+        emptyDir: {}

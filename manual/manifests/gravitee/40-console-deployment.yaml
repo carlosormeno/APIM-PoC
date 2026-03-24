@@ -18,10 +18,10 @@ spec:
         image: graviteeio/apim-management-ui:4.10.3
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 8084
+        - containerPort: 8080
         env:
         - name: MGMT_API_URL
-          value: "http://gravitee-management-api.apim-gravitee.svc.cluster.local:8083"
+          value: "https://apim-gravitee.local:31443/management"
         resources:
           requests:
             cpu: 200m

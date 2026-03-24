@@ -1,0 +1,138 @@
+# Runbook 1 – Gravitee APIM (k3s + NGINX + TLS + Portal + B2B/B2C)
+
+> Objetivo: instalar y validar Gravitee APIM en el entorno base, aplicando el baseline de seguridad y los casos B2B/B2C definidos en `manual/test.md` y `manual/checklist.md`.
+
+---
+
+## 0) Pre-requisitos
+- Base lista según `manual/docs/runbook-0-base-apim-poc-manual.md`.
+- Ingress NGINX operativo + TLS (cert-manager).
+- Vault disponible para secrets (obligatorio).
+- Backends PoC desplegados en `poc-backends`.
+
+---
+
+## 1) Instalación de Gravitee (Manual)
+
+> Nota: usar **Gravitee APIM 4.10.3**. Fijar versión exacta de imágenes y registrarlo en evidencias.
+
+1. Crear namespace:
+```bash
+kubectl create ns apim-gravitee
+```
+
+2. Preparar manifests en `manual/manifests/gravitee/`:
+- MongoDB (auth desde Vault)
+- Deployments/Services/Ingress
+- Recursos (requests/limits)
+- Persistence (si aplica)
+
+3. Inyectar secretos con Vault Agent Injector:
+   - Anotar los pods/deployments con `vault.hashicorp.com/*`
+   - Montar archivos en una ruta conocida por el producto
+   - Registrar en `changes.log`
+
+Ejemplo de annotations (ajustar path/clave en Vault):
+```
+vault.hashicorp.com/agent-inject: "true"
+vault.hashicorp.com/role: "apim-gravitee"
+vault.hashicorp.com/agent-inject-secret-admin: "kv/apim/gravitee/admin"
+vault.hashicorp.com/agent-inject-template-admin: |
+  {{- with secret "kv/apim/gravitee/admin" -}}
+  admin_password={{ .Data.data.password }}
+  {{- end -}}
+```
+
+Ruta sugerida para archivos inyectados: `/vault/secrets/` (verificar en el chart).
+
+4. Aplicar manifests:
+```bash
+kubectl apply -f manual/manifests/gravitee/
+```
+
+5. Actualizar `/etc/hosts` con:
+   - `apim-gravitee.local` (Console UI)
+   - `portal-gravitee.local` (Dev Portal)
+   - `api-gravitee.local` (Gateway)
+
+6. Verificar:
+```bash
+kubectl -n apim-gravitee get pods,svc,ingress
+```
+
+---
+
+## 2) Configuración inicial
+- Acceder a la consola Publisher/Portal.
+- Crear usuario admin y roles base.
+- Configurar el IdP/OIDC (para B2B/B2C) si aplica.
+
+---
+
+## 3) Publicación de APIs de ejemplo (no “hello world”)
+Implementar todas las APIs de `manual/test.md`:
+
+- `/partner/orders` (B2B)
+- `/customer/profile` (B2C)
+- `/legacy/billing`
+- `/health`
+
+> Usar backends en `poc-backends` y documentar endpoints reales.
+
+---
+
+## 4) Segmentación B2B/B2C (obligatorio)
+
+### B2B – Partner externo
+- 1 empresa externa
+- 1 app
+- OAuth2 **client credentials**
+- Rate limit propio
+- Acceso solo a ciertas APIs
+
+### B2C – App móvil
+- Usuarios finales
+- OAuth2 **authorization code**
+- Scopes
+- Refresh tokens
+
+> Registra en evidencias el flujo completo (capturas + requests + tokens).
+
+---
+
+## 5) Policies mínimas
+- Auth obligatorio (deny-by-default)
+- Validación de scopes
+- Rate limits y quotas por plan
+- IP allow/deny (si aplica)
+- CORS + headers (X-Request-ID)
+
+> Hardening opcional: NetworkPolicies y/o mTLS interno. Documentar si se aplica.
+
+---
+
+## 6) Smoke tests
+Ver checklist en `poc-blueprint-apim-k3s_actualizado.md`.
+
+---
+
+## 7) Performance (k6)
+Ejecutar S0–S3 desde `k6/`.
+Exportar JSON a `evidence/YYYY-MM-DD/gravitee/round-X/k6`.
+
+---
+
+## 8) Evidencias obligatorias
+- Capturas Publisher/Portal
+- Config OAuth2
+- Resultados k6
+- Dashboards Grafana
+- Logs relevantes
+- `changes.log` actualizado
+
+---
+
+## 9) Preguntas post-ejecución
+- ¿Qué tan fácil fue?
+- ¿Qué tan claro quedó para el partner?
+- ¿Dónde duele operar?

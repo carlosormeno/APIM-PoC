@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gravitee-management-config
+  namespace: apim-gravitee
+data:
+  gravitee.yml.tpl: |
+    management:
+      type: mongodb
+      mongodb:
+        uri: mongodb://gravitee:__MONGO_PASSWORD__@gravitee-mongo.apim-gravitee.svc.cluster.local:27017/gravitee?authSource=admin
+
+    analytics:
+      type: none
+
+    portal:
+      url: https://portal-gravitee.local

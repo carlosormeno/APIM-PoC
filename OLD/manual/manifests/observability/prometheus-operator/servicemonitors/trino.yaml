@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: trino-coordinator
+  namespace: monitoring
+  labels:
+    monitoring: "true"
+spec:
+  namespaceSelector:
+    matchNames:
+      - bi-processing
+  selector:
+    matchLabels:
+      app: trino-coordinator
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s

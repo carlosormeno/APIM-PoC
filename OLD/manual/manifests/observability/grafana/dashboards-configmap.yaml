@@ -1,0 +1,2691 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  airflow-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "description": "Paneles clave de Airflow para scheduler, executor y pools m\u00e1s alertas b\u00e1sicas para fallos y saturaci\u00f3n.",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "iteration": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "airflow_scheduler_tasks{state=\"executable\"}",
+              "legendFormat": "Ejecutables",
+              "refId": "A"
+            },
+            {
+              "expr": "airflow_scheduler_tasks{state=\"starving\"}",
+              "legendFormat": "Starving",
+              "refId": "B"
+            }
+          ],
+          "title": "Scheduler queues",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "tasks"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "airflow_executor_queued_tasks",
+              "legendFormat": "En cola",
+              "refId": "A"
+            },
+            {
+              "expr": "airflow_executor_running_tasks",
+              "legendFormat": "En ejecuci\u00f3n",
+              "refId": "B"
+            }
+          ],
+          "title": "Executor queue",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "slots"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "airflow_pool_open_slots",
+              "legendFormat": "Slots abiertos",
+              "refId": "A"
+            },
+            {
+              "expr": "airflow_pool_used_slots",
+              "legendFormat": "Slots usados",
+              "refId": "B"
+            }
+          ],
+          "title": "Pool slots",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "rate(airflow_operator_failures_total[5m])",
+              "legendFormat": "Failures",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(airflow_operator_successes_total[5m])",
+              "legendFormat": "Successes",
+              "refId": "B"
+            }
+          ],
+          "title": "Operator results",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 10
+          },
+          "id": 5,
+          "targets": [
+            {
+              "expr": "airflow_dagrun_duration_seconds{quantile=\"0.5\"}",
+              "legendFormat": "P50",
+              "refId": "A"
+            },
+            {
+              "expr": "airflow_dagrun_duration_seconds{quantile=\"0.95\"}",
+              "legendFormat": "P95",
+              "refId": "B"
+            }
+          ],
+          "title": "Duraci\u00f3n DAG runs",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 10
+          },
+          "id": 6,
+          "targets": [
+            {
+              "expr": "airflow_dagbag_size",
+              "legendFormat": "DAGs cargados",
+              "refId": "A"
+            }
+          ],
+          "title": "DAG bag size",
+          "type": "stat"
+        }
+      ],
+      "schemaVersion": 36,
+      "style": "dark",
+      "tags": [
+        "airflow",
+        "orchestration"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Airflow - Orchestrator health",
+      "uid": "airflow-monitoring"
+    }
+  airflow-loki-basic-dashboard.json: |
+    {
+      "__inputs": [
+        {
+          "name": "DS_LOKI",
+          "label": "Loki",
+          "description": "",
+          "type": "datasource",
+          "pluginId": "loki",
+          "pluginName": "Loki"
+        }
+      ],
+      "__requires": [
+        {
+          "type": "grafana",
+          "id": "grafana",
+          "name": "Grafana",
+          "version": "9.0.0"
+        },
+        {
+          "type": "datasource",
+          "id": "loki",
+          "name": "Loki",
+          "version": "1.0.0"
+        }
+      ],
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": null,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "panels": [],
+          "title": "Overview",
+          "type": "row"
+        },
+        {
+          "datasource": "${DS_LOKI}",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 1
+          },
+          "id": 2,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({job=\"airflow-tasklogs\",namespace=\"$namespace\"} |= \"ERROR\" [5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Errors (last 5m)",
+          "type": "stat"
+        },
+        {
+          "datasource": "${DS_LOKI}",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 1
+          },
+          "id": 3,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({job=\"airflow-tasklogs\",namespace=\"$namespace\"} |= \"Traceback\" [5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Tracebacks (last 5m)",
+          "type": "stat"
+        },
+        {
+          "datasource": "${DS_LOKI}",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 12,
+            "y": 1
+          },
+          "id": 8,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({job=\"airflow-tasklogs\",namespace=\"$namespace\"} |= \"Exception\" [5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Exceptions (last 5m)",
+          "type": "stat"
+        },
+        {
+          "datasource": "${DS_LOKI}",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "yellow",
+                    "value": 1
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 18,
+            "y": 1
+          },
+          "id": 9,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({job=\"airflow-tasklogs\",namespace=\"$namespace\"} |= \"WARNING\" [5m]))",
+              "refId": "A"
+            }
+          ],
+          "title": "Warnings (last 5m)",
+          "type": "stat"
+        },
+        {
+          "datasource": "${DS_LOKI}",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 5
+          },
+          "id": 4,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom"
+            },
+            "tooltip": {
+              "mode": "single"
+            }
+          },
+          "targets": [
+            {
+              "expr": "sum(count_over_time({job=\"airflow-tasklogs\",namespace=\"$namespace\"}[1m]))",
+              "legendFormat": "lines/min",
+              "refId": "A"
+            }
+          ],
+          "title": "Log Volume (lines/min)",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 13
+          },
+          "id": 5,
+          "panels": [],
+          "title": "Logs",
+          "type": "row"
+        },
+        {
+          "datasource": "${DS_LOKI}",
+          "gridPos": {
+            "h": 14,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "id": 6,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "expr": "{job=\"airflow-tasklogs\",namespace=\"$namespace\",pod=~\"${pod:regex}\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "All Airflow Task Logs (namespace/pod)",
+          "type": "logs"
+        },
+        {
+          "datasource": "${DS_LOKI}",
+          "gridPos": {
+            "h": 14,
+            "w": 24,
+            "x": 0,
+            "y": 28
+          },
+          "id": 7,
+          "options": {
+            "dedupStrategy": "none",
+            "enableLogDetails": true,
+            "prettifyLogMessage": false,
+            "showCommonLabels": false,
+            "showLabels": false,
+            "showTime": true,
+            "sortOrder": "Descending",
+            "wrapLogMessage": true
+          },
+          "targets": [
+            {
+              "expr": "{job=\"airflow-tasklogs\",namespace=\"$namespace\",pod=~\"${pod:regex}\",filename=~\".*dag_id=${dag_id}/run_id=${run_id}/task_id=${task_id}/attempt=${attempt}\\\\.log\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "Task Log (by dag_id/run_id/task_id/attempt)",
+          "type": "logs"
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": [
+        "airflow",
+        "loki",
+        "logs"
+      ],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": false,
+              "text": "Loki",
+              "value": "Loki"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "label": "Datasource",
+            "multi": false,
+            "name": "DS_LOKI",
+            "options": [],
+            "query": "loki",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "bi-orchestration",
+              "value": "bi-orchestration"
+            },
+            "datasource": "${DS_LOKI}",
+            "definition": "label_values({job=\"airflow-tasklogs\"}, namespace)",
+            "hide": 0,
+            "includeAll": false,
+            "label": "Namespace",
+            "multi": false,
+            "name": "namespace",
+            "options": [],
+            "query": {
+              "query": "label_values({job=\"airflow-tasklogs\"}, namespace)",
+              "refId": "LokiVariableQueryEditor-namespace"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": "All",
+              "value": "$__all"
+            },
+            "datasource": "${DS_LOKI}",
+            "allValue": ".*",
+            "definition": "label_values({job=\"airflow-tasklogs\",namespace=\"$namespace\"}, pod)",
+            "hide": 0,
+            "includeAll": true,
+            "label": "Pod",
+            "multi": true,
+            "name": "pod",
+            "options": [],
+            "query": {
+              "query": "label_values({job=\"airflow-tasklogs\",namespace=\"$namespace\"}, pod)",
+              "refId": "LokiVariableQueryEditor-pod"
+            },
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": ".*",
+              "value": ".*"
+            },
+            "hide": 0,
+            "label": "dag_id (regex)",
+            "name": "dag_id",
+            "query": ".*",
+            "skipUrlSync": false,
+            "type": "textbox"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": ".*",
+              "value": ".*"
+            },
+            "hide": 0,
+            "label": "run_id (regex)",
+            "name": "run_id",
+            "query": ".*",
+            "skipUrlSync": false,
+            "type": "textbox"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": ".*",
+              "value": ".*"
+            },
+            "hide": 0,
+            "label": "task_id (regex)",
+            "name": "task_id",
+            "query": ".*",
+            "skipUrlSync": false,
+            "type": "textbox"
+          },
+          {
+            "current": {
+              "selected": false,
+              "text": ".*",
+              "value": ".*"
+            },
+            "hide": 0,
+            "label": "attempt (regex)",
+            "name": "attempt",
+            "query": ".*",
+            "skipUrlSync": false,
+            "type": "textbox"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-6h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h"
+        ]
+      },
+      "timezone": "",
+      "title": "Airflow - Task Logs (Loki) - Basic",
+      "uid": "airflow-loki-basic",
+      "version": 1,
+      "weekStart": ""
+    }
+  minio-buckets-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "description": "Dashboard orientado a buckets: cuenta de buckets, tama\u00f1o por bucket y cantidad de objetos; las m\u00e9tricas de carpetas/archivos no est\u00e1n disponibles en Prometheus.",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "iteration": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "minio_cluster_bucket_total{server=\"127.0.0.1:9000\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "Buckets totales",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 4
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "sum by (bucket) (minio_bucket_usage_total_bytes{server=\"127.0.0.1:9000\",bucket=~\"$bucket\"})",
+              "legendFormat": "{{bucket}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Tama\u00f1o por bucket",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 4
+          },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "sum by (bucket) (minio_bucket_usage_object_total{server=\"127.0.0.1:9000\",bucket=~\"$bucket\"})",
+              "legendFormat": "{{bucket}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Cantidad de objetos por bucket",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 10
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "sum(minio_bucket_usage_total_bytes{server=\"127.0.0.1:9000\",bucket=~\"$bucket\"})",
+              "refId": "A"
+            }
+          ],
+          "title": "Peso del bucket seleccionado",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 10
+          },
+          "id": 5,
+          "targets": [
+            {
+              "expr": "sum(minio_bucket_usage_object_total{server=\"127.0.0.1:9000\",bucket=~\"$bucket\"})",
+              "refId": "A"
+            }
+          ],
+          "title": "Objetos totales bucket",
+          "type": "stat"
+        }
+      ],
+      "schemaVersion": 36,
+      "style": "dark",
+      "tags": [
+        "minio",
+        "storage"
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "bucket",
+            "type": "query",
+            "label": "Bucket",
+            "query": "label_values(minio_bucket_usage_total_bytes{server=\"127.0.0.1:9000\"}, bucket)",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "PBFA97CFB590B2093"
+            },
+            "includeAll": false,
+            "multi": false,
+            "current": {
+              "text": "",
+              "value": ""
+            }
+          }
+        ]
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "MinIO - Buckets",
+      "uid": "minio-buckets"
+    }
+  minio-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "description": "MinIO storage / performance dashboard con m\u00e9tricas de uso, buckets y requests; apunta a servicios disponibles en bi-infra.",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "iteration": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "minio_cluster_health_status{server=\"127.0.0.1:9000\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "Cluster health",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "100 * minio_cluster_usage_total_bytes{server=\"127.0.0.1:9000\"} / minio_cluster_capacity_usable_total_bytes{server=\"127.0.0.1:9000\"}",
+              "refId": "A"
+            }
+          ],
+          "title": "Uso de capacidad (%)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 4
+          },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "sum by (bucket) (minio_bucket_usage_total_bytes{server=\"127.0.0.1:9000\"})",
+              "legendFormat": "{{bucket}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Uso por bucket (bytes)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 10
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "sum by (bucket) (minio_bucket_usage_object_total{server=\"127.0.0.1:9000\"})",
+              "legendFormat": "{{bucket}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Objetos por bucket",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 4
+          },
+          "id": 5,
+          "targets": [
+            {
+              "expr": "sum by (api) (rate(minio_bucket_requests_total{server=\"127.0.0.1:9000\"}[5m]))",
+              "legendFormat": "{{api}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Requests por API (ops/s)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 10
+          },
+          "id": 6,
+          "targets": [
+            {
+              "expr": "sum by (bucket) (rate(minio_bucket_requests_4xx_errors_total{server=\"127.0.0.1:9000\"}[5m]))",
+              "legendFormat": "Errores {{bucket}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Errores 4xx por bucket",
+          "type": "timeseries"
+        }
+      ],
+      "schemaVersion": 36,
+      "style": "dark",
+      "tags": [
+        "minio",
+        "storage"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "MinIO - Storage overview",
+      "uid": "minio-monitoring"
+    }
+  nessie-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "description": "Observabilidad de Nessie: solicitudes HTTP, caches, worker pools y latencias en storage.",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "iteration": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "sum by (uri) (rate(http_server_requests_seconds_count[5m]))",
+              "legendFormat": "{{uri}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Requests HTTP por URI",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "sum by (status) (rate(http_server_requests_seconds_count[5m]))",
+              "legendFormat": "{{status}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Responses por c\u00f3digo",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "rate(cache_gets_total{cache=\"nessie-objects\",result=\"hit\"}[5m])",
+              "legendFormat": "Hits",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(cache_gets_total{cache=\"nessie-objects\",result=\"miss\"}[5m])",
+              "legendFormat": "Misses",
+              "refId": "B"
+            }
+          ],
+          "title": "Cache gets (objects)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "worker_pool_queue_size{pool_name=\"vert.x-worker-thread\"}",
+              "legendFormat": "Worker queue",
+              "refId": "A"
+            },
+            {
+              "expr": "worker_pool_active{pool_name=\"vert.x-worker-thread\"}",
+              "legendFormat": "Worker active",
+              "refId": "B"
+            }
+          ],
+          "title": "Worker pools",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 95
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 12,
+            "x": 0,
+            "y": 10
+          },
+          "id": 5,
+          "targets": [
+            {
+              "expr": "process_cpu_usage",
+              "legendFormat": "CPU",
+              "refId": "A"
+            },
+            {
+              "expr": "system_cpu_usage",
+              "legendFormat": "System CPU",
+              "refId": "B"
+            }
+          ],
+          "title": "Uso CPU",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 10
+          },
+          "id": 6,
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(nessie_storage_persist_seconds_bucket[5m])) by (le, method))",
+              "legendFormat": "Persist {method}",
+              "refId": "A"
+            }
+          ],
+          "title": "Persist latency P95",
+          "type": "timeseries"
+        }
+      ],
+      "schemaVersion": 36,
+      "style": "dark",
+      "tags": [
+        "nessie",
+        "catalog"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Nessie - Management",
+      "uid": "nessie-monitoring"
+    }
+  postgres-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "description": "PostgreSQL exporter dashboard para conexiones, transacciones, bloqueos y uso de disco de Nessie/Postgres.",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "iteration": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 80
+                  },
+                  {
+                    "color": "red",
+                    "value": 120
+                  }
+                ]
+              },
+              "unit": "conns"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "pg_stat_activity_count{state=\"active\"}",
+              "legendFormat": "Activas",
+              "refId": "A"
+            },
+            {
+              "expr": "pg_stat_activity_count{state=\"idle\"}",
+              "legendFormat": "Idle",
+              "refId": "B"
+            }
+          ],
+          "title": "Conexiones activas",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "rate(pg_stat_database_xact_commit[5m])",
+              "legendFormat": "Commits",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(pg_stat_database_xact_rollback[5m])",
+              "legendFormat": "Rollbacks",
+              "refId": "B"
+            }
+          ],
+          "title": "Transacciones por segundo",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 90
+                  },
+                  {
+                    "color": "red",
+                    "value": 70
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 5
+          },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "100 * (rate(pg_stat_database_blks_hit[5m]) / (rate(pg_stat_database_blks_hit[5m]) + rate(pg_stat_database_blks_read[5m])))",
+              "legendFormat": "Cache hit",
+              "refId": "A"
+            }
+          ],
+          "title": "Cache hit ratio",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "locks"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 5
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "pg_locks_count",
+              "legendFormat": "{{mode}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Bloqueos",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 0,
+            "y": 10
+          },
+          "id": 5,
+          "targets": [
+            {
+              "expr": "rate(pg_stat_database_temp_files[5m])",
+              "legendFormat": "Temp files",
+              "refId": "A"
+            },
+            {
+              "expr": "rate(pg_stat_database_temp_bytes[5m])",
+              "legendFormat": "Temp bytes",
+              "refId": "B"
+            }
+          ],
+          "title": "Temp files/bytes",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 12,
+            "x": 12,
+            "y": 10
+          },
+          "id": 6,
+          "targets": [
+            {
+              "expr": "pg_database_size_bytes{datname=\"nessie_db\"}",
+              "legendFormat": "nessie_db",
+              "refId": "A"
+            }
+          ],
+          "title": "Tama\u00f1o base Nessie",
+          "type": "stat"
+        }
+      ],
+      "schemaVersion": 36,
+      "style": "dark",
+      "tags": [
+        "postgres",
+        "db"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "PostgreSQL - Infra health",
+      "uid": "postgres-monitoring"
+    }
+  spark-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "description": "Dashboard que combina m\u00e9tricas de Spark (master + workers) con m\u00e9tricas de contenedores para CPU, memoria e I/O.",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "iteration": 1697056434711,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.6
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.9
+                  }
+                ]
+              },
+              "unit": "cores"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "rate(container_cpu_usage_seconds_total{namespace=\"bi-processing\", pod=\"$worker_pod\"}[5m])",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "title": "CPU Spark (cores por pod)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.75
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.9
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "container_memory_usage_bytes{namespace=\"bi-processing\", pod=\"$worker_pod\"}",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Memoria Spark (bytes)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 10
+                  },
+                  {
+                    "color": "red",
+                    "value": 100
+                  }
+                ]
+              },
+              "unit": "B/s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 7
+          },
+          "id": 6,
+          "targets": [
+            {
+              "expr": "sum by (pod) (rate(container_fs_reads_bytes_total{namespace=\"bi-processing\", pod=~\"spark-(master|worker).*\"}[5m]))",
+              "legendFormat": "Leer {{pod}}",
+              "refId": "A"
+            },
+            {
+              "expr": "sum by (pod) (rate(container_fs_writes_bytes_total{namespace=\"bi-processing\", pod=~\"spark-(master|worker).*\"}[5m]))",
+              "legendFormat": "Escribir {{pod}}",
+              "refId": "B"
+            }
+          ],
+          "title": "I/O Spark (bytes/s)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 3
+                  },
+                  {
+                    "color": "red",
+                    "value": 6
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 7
+          },
+          "id": 8,
+          "targets": [
+            {
+              "expr": "metrics_master_aliveWorkers_Value",
+              "legendFormat": "Workers vivos",
+              "refId": "A"
+            },
+            {
+              "expr": "metrics_master_workers_Value",
+              "legendFormat": "Workers totales",
+              "refId": "B"
+            },
+            {
+              "expr": "metrics_master_apps_Value",
+              "legendFormat": "Aplicaciones activas",
+              "refId": "C"
+            },
+            {
+              "expr": "metrics_master_waitingApps_Value",
+              "legendFormat": "Aplic. en cola",
+              "refId": "D"
+            }
+          ],
+          "title": "Spark Master - estado",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 14
+          },
+          "id": 10,
+          "targets": [
+            {
+              "expr": "metrics_worker_memUsed_MB_Value",
+              "legendFormat": "Mem usada (MB)",
+              "refId": "A"
+            },
+            {
+              "expr": "metrics_worker_memFree_MB_Value",
+              "legendFormat": "Mem libre (MB)",
+              "refId": "B"
+            },
+            {
+              "expr": "metrics_worker_coresUsed_Value",
+              "legendFormat": "Cores usados",
+              "refId": "C"
+            },
+            {
+              "expr": "metrics_worker_executors_Value",
+              "legendFormat": "Executors activos",
+              "refId": "D"
+            }
+          ],
+          "title": "Spark Worker - recursos",
+          "type": "timeseries"
+        }
+      ],
+      "schemaVersion": 36,
+      "style": "dark",
+      "tags": [
+        "spark",
+        "bi-processing"
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "worker_pod",
+            "type": "query",
+            "label": "Worker pod",
+            "datasource": {
+              "type": "prometheus",
+              "uid": "PBFA97CFB590B2093"
+            },
+            "query": "label_values(container_cpu_usage_seconds_total{namespace=\"bi-processing\", pod=~\"spark-worker.*\"}, pod)",
+            "includeAll": false,
+            "multi": false,
+            "current": {
+              "text": "",
+              "value": ""
+            }
+          }
+        ]
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Spark - Monitoring general",
+      "uid": "spark-monitoring"
+    }
+  trino-dashboard.json: |
+    {
+      "annotations": {
+        "list": []
+      },
+      "description": "Trino coordinator performance: latencias, throughput y errores de metastore para detectar cuellos de botella.",
+      "editable": true,
+      "gnetId": null,
+      "graphTooltip": 0,
+      "id": null,
+      "iteration": 1,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.5
+                  },
+                  {
+                    "color": "red",
+                    "value": 1.0
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 1,
+          "targets": [
+            {
+              "expr": "trino_eventlistener_eventlistenermanager_querycompletedtime_fiveminutes_p95",
+              "legendFormat": "P95",
+              "refId": "A"
+            }
+          ],
+          "title": "Query latency P95 (5m)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.75
+                  },
+                  {
+                    "color": "red",
+                    "value": 1.5
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 2,
+          "targets": [
+            {
+              "expr": "trino_eventlistener_eventlistenermanager_querycompletedtime_fiveminutes_p99",
+              "legendFormat": "P99",
+              "refId": "A"
+            }
+          ],
+          "title": "Query latency P99 (5m)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 4
+          },
+          "id": 3,
+          "targets": [
+            {
+              "expr": "rate(trino_eventlistener_eventlistenermanager_querycompletedtime_fiveminutes_count[5m])",
+              "legendFormat": "queries/sec",
+              "refId": "A"
+            }
+          ],
+          "title": "Throughput de queries (5m)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 4
+          },
+          "id": 4,
+          "targets": [
+            {
+              "expr": "process_cpu_usage",
+              "legendFormat": "CPU",
+              "refId": "A"
+            },
+            {
+              "expr": "system_load_average_1m",
+              "legendFormat": "Load 1m",
+              "refId": "B"
+            }
+          ],
+          "title": "CPU y carga",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "ops"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 10
+          },
+          "id": 5,
+          "targets": [
+            {
+              "expr": "rate(trino_plugin_hive_metastore_thrift_thrifthivemetastore_getalltables_totalfailures_oneminute_count[5m])",
+              "legendFormat": "GetAllTables failures",
+              "refId": "A"
+            },
+            {
+              "expr": "trino_plugin_hive_metastore_thrift_thrifthivemetastore_createdatabase_thriftexceptions_oneminute_rate",
+              "legendFormat": "CreateDatabase errors",
+              "refId": "B"
+            }
+          ],
+          "title": "Metastore failures",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {},
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 10
+          },
+          "id": 6,
+          "targets": [
+            {
+              "expr": "io_trino_filesystem_s3_s3filesystemstats_total_latency_fifteenminutes_p95{name=\"hive\"}",
+              "legendFormat": "Total (hive)",
+              "refId": "A"
+            },
+            {
+              "expr": "io_trino_filesystem_s3_s3filesystemstats_total_latency_fifteenminutes_p95{name=\"iceberg\"}",
+              "legendFormat": "Total (iceberg)",
+              "refId": "B"
+            }
+          ],
+          "title": "Latencia S3 P95",
+          "type": "timeseries"
+        }
+      ],
+      "schemaVersion": 36,
+      "style": "dark",
+      "tags": [
+        "trino",
+        "sql"
+      ],
+      "templating": {
+        "list": []
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "Trino - Coordinator overview",
+      "uid": "trino-monitoring"
+    }

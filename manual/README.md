@@ -10,6 +10,8 @@ Este árbol contiene la versión **100% manual** (YAML + kubectl) de la PoC.
 
 ## Estructura
 - `manual/docs/` runbooks y guía manual.
+- `manual/docs/bitacora-ejecucion-poc-apim.md` bitacora viva de ejecucion.
+- `manual/docs/informe-final-template-poc-apim.md` plantilla para informe final.
 - `manual/manifests/` YAMLs por componente.
 - `manual/backends/`, `manual/k6/`, `manual/vault/` duplicados para uso manual.
 - `manual/images/` Dockerfiles si hay que customizar imágenes.

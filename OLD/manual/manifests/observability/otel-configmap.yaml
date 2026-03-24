@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: monitoring
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+
+    exporters:
+      logging:
+        loglevel: info
+      prometheus:
+        endpoint: 0.0.0.0:9464
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          exporters: [prometheus, logging]
+        traces:
+          receivers: [otlp]
+          exporters: [logging]
+        logs:
+          receivers: [otlp]
+          exporters: [logging]

@@ -16,6 +16,7 @@ spec:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "apim-gravitee"
         vault.hashicorp.com/agent-pre-populate: "true"
+        vault.hashicorp.com/agent-init-first: "true"
         vault.hashicorp.com/agent-inject-secret-mongo: "kv/apim/gravitee/mongo"
         vault.hashicorp.com/agent-inject-template-mongo: |
           {{- with secret "kv/apim/gravitee/mongo" -}}
@@ -29,6 +30,7 @@ spec:
           - sh
           - -c
           - |
+            set -e
             MONGO_PW=$(cat /vault/secrets/mongo)
             sed "s/__MONGO_PASSWORD__/${MONGO_PW}/g" /config-template/gravitee.yml.tpl > /config/gravitee.yml
         volumeMounts:
@@ -42,9 +44,34 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8083
+        env:
+        - name: console_ui_url
+          value: "https://apim-gravitee.local:31443"
+        - name: console_api_url
+          value: "https://apim-gravitee.local:31443/management"
+        - name: portal_ui_url
+          value: "https://portal-gravitee.local:31443"
+        - name: gravitee_adminAccountEnable
+          value: "true"
+        - name: gravitee_adminPasswordBcrypt
+          value: "$2a$10$Ihk05VSds5rUSgMdsMVi9OKMIx2yUvMz7y9VP3rJmQeizZLrhLMyq"
+        startupProbe:
+          tcpSocket:
+            port: 8083
+          failureThreshold: 30
+          periodSeconds: 5
+          timeoutSeconds: 1
+        readinessProbe:
+          tcpSocket:
+            port: 8083
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 1
+          failureThreshold: 6
         volumeMounts:
         - name: config
-          mountPath: /graviteeio-management-api/config
+          mountPath: /opt/graviteeio-management-api/config/gravitee.yml
+          subPath: gravitee.yml
         resources:
           requests:
             cpu: 500m

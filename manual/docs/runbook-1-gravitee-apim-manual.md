@@ -12,53 +12,62 @@
 
 ---
 
-## 1) Instalación de Gravitee (Manual)
+## 1) Instalación de Gravitee (Helm oficial, clean install)
 
-> Nota: usar **Gravitee APIM 4.10.3**. Fijar versión exacta de imágenes y registrarlo en evidencias.
+> Nota: para esta PoC, se recomienda borrar todo lo previo de `apim-gravitee` y reinstalar con el chart oficial.
 
-1. Crear namespace:
+1. Verificar que `ingress-nginx` tenga HTTPS en NodePort `31443`:
 ```bash
+kubectl -n ingress-nginx get svc ingress-nginx-controller -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}{"\n"}'
+```
+
+2. Borrar instalación Gravitee previa (no afecta otros namespaces):
+```bash
+kubectl delete ns apim-gravitee --wait=true
 kubectl create ns apim-gravitee
 ```
 
-2. Preparar manifests en `manual/manifests/gravitee/`:
-- MongoDB (auth desde Vault)
-- Deployments/Services/Ingress
-- Recursos (requests/limits)
-- Persistence (si aplica)
+3. Verificar `/etc/hosts`:
+- `apim-gravitee.local`
+- `portal-gravitee.local`
+- `api-gravitee.local`
 
-3. Inyectar secretos con Vault Agent Injector:
-   - Anotar los pods/deployments con `vault.hashicorp.com/*`
-   - Montar archivos en una ruta conocida por el producto
-   - Registrar en `changes.log`
+4. Usar valores oficiales adaptados en:
+- `APIM/gravitee/values.yaml`
 
-Ejemplo de annotations (ajustar path/clave en Vault):
-```
-vault.hashicorp.com/agent-inject: "true"
-vault.hashicorp.com/role: "apim-gravitee"
-vault.hashicorp.com/agent-inject-secret-admin: "kv/apim/gravitee/admin"
-vault.hashicorp.com/agent-inject-template-admin: |
-  {{- with secret "kv/apim/gravitee/admin" -}}
-  admin_password={{ .Data.data.password }}
-  {{- end -}}
-```
-
-Ruta sugerida para archivos inyectados: `/vault/secrets/` (verificar en el chart).
-
-4. Aplicar manifests:
+5. Instalar chart oficial:
 ```bash
-kubectl apply -f manual/manifests/gravitee/
+helm repo add graviteeio https://helm.gravitee.io
+helm repo update
+
+helm upgrade --install gravitee graviteeio/apim3 \
+  -n apim-gravitee \
+  -f APIM/gravitee/values.yaml \
+  --wait --timeout 15m
 ```
 
-5. Actualizar `/etc/hosts` con:
-   - `apim-gravitee.local` (Console UI)
-   - `portal-gravitee.local` (Dev Portal)
-   - `api-gravitee.local` (Gateway)
-
-6. Verificar:
+6. Verificar estado:
 ```bash
 kubectl -n apim-gravitee get pods,svc,ingress
 ```
+
+7. Validar bootstrap de Management API:
+```bash
+curl -skD- https://apim-gravitee.local:31443/management/v2/ui/bootstrap
+```
+
+8. Login inicial:
+- URL: `https://apim-gravitee.local:31443/`
+- Usuario: `admin`
+- Password: `admin`
+
+### Notas operativas para esta PoC
+- Se reutiliza infraestructura ya instalada en el nodo:
+  - `ingress-nginx`
+  - `cert-manager` (issuer `selfsigned-issuer`)
+  - observabilidad, Vault, backends, etc.
+- El puerto `31443` se mantiene como punto de entrada HTTPS para Gravitee.
+- WSO2 no se toca porque está en otro namespace (`apim-wso2`).
 
 ---
 

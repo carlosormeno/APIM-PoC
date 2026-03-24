@@ -8,4 +8,4 @@ spec:
     app: gravitee-portal
   ports:
   - port: 8085
-    targetPort: 8085
+    targetPort: 8080

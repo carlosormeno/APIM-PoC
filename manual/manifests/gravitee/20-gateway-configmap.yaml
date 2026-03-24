@@ -11,4 +11,12 @@ data:
         uri: mongodb://gravitee:__MONGO_PASSWORD__@gravitee-mongo.apim-gravitee.svc.cluster.local:27017/gravitee?authSource=admin
 
     analytics:
-      type: none
+      type: elasticsearch
+      elasticsearch:
+        endpoints:
+          - http://gravitee-elasticsearch.apim-gravitee.svc.cluster.local:9200
+
+    ratelimit:
+      type: mongodb
+      mongodb:
+        uri: mongodb://gravitee:__MONGO_PASSWORD__@gravitee-mongo.apim-gravitee.svc.cluster.local:27017/gravitee?authSource=admin

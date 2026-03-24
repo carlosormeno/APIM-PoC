@@ -16,3 +16,7 @@ spec:
     port: 443
     targetPort: https
     nodePort: 30443
+  - name: https-alt
+    port: 444
+    targetPort: https
+    nodePort: 31443
