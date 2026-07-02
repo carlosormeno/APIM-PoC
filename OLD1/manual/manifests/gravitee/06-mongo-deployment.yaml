@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gravitee-mongo
+  namespace: apim-gravitee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gravitee-mongo
+  template:
+    metadata:
+      labels:
+        app: gravitee-mongo
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "apim-gravitee"
+        vault.hashicorp.com/agent-pre-populate: "true"
+        vault.hashicorp.com/agent-inject-secret-mongo: "kv/apim/gravitee/mongo"
+        vault.hashicorp.com/agent-inject-template-mongo: |
+          {{- with secret "kv/apim/gravitee/mongo" -}}
+          {{ .Data.data.password }}
+          {{- end -}}
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:7
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: gravitee
+        - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+          value: /vault/secrets/mongo
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: data
+          mountPath: /data/db
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: gravitee-mongo-pvc

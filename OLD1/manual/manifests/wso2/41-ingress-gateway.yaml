@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wso2apim-gateway
+  namespace: apim-wso2
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - api-wso2.local
+    secretName: wso2apim-gateway-tls
+  rules:
+  - host: api-wso2.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wso2apim
+            port:
+              number: 8243

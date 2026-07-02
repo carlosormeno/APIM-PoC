@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: minio
+  namespace: monitoring
+  labels:
+    monitoring: "true"
+spec:
+  namespaceSelector:
+    matchNames:
+      - bi-infra
+  selector:
+    matchLabels:
+      app: minio
+      monitoring: "true"
+  endpoints:
+    - port: http
+      path: /minio/v2/metrics/cluster
+      interval: 30s
+    - port: http
+      path: /minio/v2/metrics/bucket
+      interval: 30s

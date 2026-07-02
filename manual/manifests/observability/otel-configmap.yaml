@@ -9,12 +9,18 @@ data:
       otlp:
         protocols:
           grpc:
+            endpoint: 0.0.0.0:4317
           http:
+            endpoint: 0.0.0.0:4318
 
     exporters:
       debug: {}
       prometheus:
         endpoint: 0.0.0.0:9464
+      otlp/jaeger:
+        endpoint: jaeger.monitoring.svc.cluster.local:4317
+        tls:
+          insecure: true
 
     service:
       pipelines:
@@ -23,7 +29,7 @@ data:
           exporters: [prometheus, debug]
         traces:
           receivers: [otlp]
-          exporters: [debug]
+          exporters: [debug, otlp/jaeger]
         logs:
           receivers: [otlp]
           exporters: [debug]

@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: gravitee-portal
+  namespace: apim-gravitee
+  annotations:
+    cert-manager.io/cluster-issuer: selfsigned-issuer
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - portal-gravitee.local
+    secretName: gravitee-portal-tls
+  rules:
+  - host: portal-gravitee.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: gravitee-portal
+            port:
+              number: 8085

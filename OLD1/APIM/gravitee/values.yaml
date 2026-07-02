@@ -1,0 +1,182 @@
+# Gravitee APIM (official Helm) values for PoC on k3s
+# Based on the official chart structure:
+# https://documentation.gravitee.io/apim/self-hosted-installation-guides/kubernetes/vanilla-kubernetes
+
+installation:
+  type: standalone
+  api:
+    url: https://apim-gravitee.local:31443/management
+  standalone:
+    console:
+      url: https://apim-gravitee.local:31443/console
+    portal:
+      url: https://portal-gravitee.local:31443
+
+global:
+  security:
+    allowInsecureImages: true
+
+# Keep in-memory auth enabled and force known admin credentials.
+inMemoryAuth:
+  enabled: true
+  passwordEncodingAlgo: bcrypt
+
+adminAccountEnable: true
+# "admin" in bcrypt ($2a$)
+adminPasswordBcrypt: $2a$10$Ihk05VSds5rUSgMdsMVi9OKMIx2yUvMz7y9VP3rJmQeizZLrhLMyq
+
+# Repositories
+management:
+  type: mongodb
+  # Public URL used by some APIM components/UI bootstrap
+  url: https://apim-gravitee.local:31443/management/
+
+ratelimit:
+  type: mongodb
+
+# APIM repository connection (used by API/Gateway components)
+mongo:
+  rsEnabled: false
+  dbhost: graviteeio-apim-mongodb-replicaset
+  dbport: 27017
+  dbname: gravitee
+  auth:
+    enabled: false
+
+# Subchart toggles
+mongodb:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  podSecurityContext:
+    enabled: false
+  containerSecurityContext:
+    enabled: false
+  volumePermissions:
+    enabled: false
+  persistence:
+    enabled: true
+    size: 20Gi
+
+es:
+  enabled: true
+
+elasticsearch:
+  enabled: true
+  sysctlImage:
+    enabled: false
+  master:
+    replicaCount: 2
+  coordinating:
+    replicaCount: 1
+  data:
+    replicaCount: 1
+  ingest:
+    replicaCount: 1
+
+# Management API
+api:
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  analytics:
+    type: elasticsearch
+  ingress:
+    management:
+      enabled: true
+      scheme: https
+      pathType: Prefix
+      path: /management
+      ingressClassName: nginx
+      hosts:
+        - apim-gravitee.local
+      tls:
+        - hosts:
+            - apim-gravitee.local
+          secretName: gravitee-console-tls
+      annotations:
+        cert-manager.io/cluster-issuer: selfsigned-issuer
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          proxy_set_header X-Forwarded-Host $host:31443;
+          proxy_set_header X-Forwarded-Port 31443;
+    portal:
+      enabled: true
+      scheme: https
+      pathType: Prefix
+      path: /portal
+      ingressClassName: nginx
+      hosts:
+        - portal-gravitee.local
+      tls:
+        - hosts:
+            - portal-gravitee.local
+          secretName: gravitee-portal-tls
+      annotations:
+        cert-manager.io/cluster-issuer: selfsigned-issuer
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          proxy_set_header X-Forwarded-Host $host:31443;
+          proxy_set_header X-Forwarded-Port 31443;
+
+# Gateway
+gateway:
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  reporters:
+    elasticsearch:
+      enabled: true
+  ingress:
+    enabled: true
+    pathType: Prefix
+    path: /
+    ingressClassName: nginx
+    hosts:
+      - api-gravitee.local
+    tls:
+      - hosts:
+          - api-gravitee.local
+        secretName: gravitee-gateway-tls
+    annotations:
+      cert-manager.io/cluster-issuer: selfsigned-issuer
+
+# Console UI
+ui:
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  baseURL: https://apim-gravitee.local:31443/management
+  ingress:
+    enabled: true
+    pathType: ImplementationSpecific
+    path: /console(/.*)?
+    ingressClassName: nginx
+    hosts:
+      - apim-gravitee.local
+    tls:
+      - hosts:
+          - apim-gravitee.local
+        secretName: gravitee-console-tls
+    annotations:
+      cert-manager.io/cluster-issuer: selfsigned-issuer
+      kubernetes.io/ingress.class: nginx
+      nginx.ingress.kubernetes.io/rewrite-target: /$1
+
+# Portal UI
+portal:
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  ingress:
+    enabled: true
+    pathType: Prefix
+    path: /
+    ingressClassName: nginx
+    hosts:
+      - portal-gravitee.local
+    tls:
+      - hosts:
+          - portal-gravitee.local
+        secretName: gravitee-portal-tls
+    annotations:
+      cert-manager.io/cluster-issuer: selfsigned-issuer

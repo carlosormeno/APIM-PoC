@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gravitee-console
+  namespace: apim-gravitee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gravitee-console
+  template:
+    metadata:
+      labels:
+        app: gravitee-console
+    spec:
+      containers:
+      - name: console
+        image: graviteeio/apim-management-ui:4.10.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MGMT_API_URL
+          value: "https://apim-gravitee.local:31443/management"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi

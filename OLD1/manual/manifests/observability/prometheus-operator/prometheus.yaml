@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus-k8s
+  namespace: monitoring
+  labels:
+    app: prometheus-k8s
+spec:
+  replicas: 1
+  serviceAccountName: prometheus
+  alerting:
+    alertmanagers:
+      - namespace: monitoring
+        name: alertmanager-receiver
+        port: http
+  serviceMonitorSelector:
+    matchLabels:
+      monitoring: "true"
+  serviceMonitorNamespaceSelector: {}
+  podMonitorSelector:
+    matchLabels:
+      monitoring: "true"
+  podMonitorNamespaceSelector: {}
+  ruleSelector:
+    matchLabels:
+      prometheus: k8s
+  ruleNamespaceSelector: {}
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 10Gi

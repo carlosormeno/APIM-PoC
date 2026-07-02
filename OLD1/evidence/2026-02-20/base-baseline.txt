@@ -1,0 +1,11 @@
+# Evidencia 2026-02-20
+
+# WSO2 API publicada desde Swagger remoto + doble token (2026-02-20 15:58:57)
+Swagger importado: http://10.50.129.101:5511/v3/api-docs
+API: ONPThaqhiriAPI v1.0.0 context=/onpthaqhiriapi
+Gateway URL: https://api-wso2.local:30443/onpthaqhiriapi/1.0.0/api/horarios
+Runtime: Authorization Header = X-APIM-Authorization
+Invocacion valida con headers:
+- X-APIM-Authorization: Bearer <token_apim>
+- Authorization: Bearer <token_backend>
+Resultado validado: HTTP 200

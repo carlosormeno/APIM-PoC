@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wso2-postgres
+  namespace: apim-wso2
+spec:
+  selector:
+    app: wso2-postgres
+  ports:
+  - port: 5432
+    targetPort: 5432

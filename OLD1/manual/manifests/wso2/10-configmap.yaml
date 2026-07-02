@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wso2apim-config
+  namespace: apim-wso2
+data:
+  # TODO: ajustar deployment.toml.tpl segun tu entorno (DB externa, hostname, etc.)
+  deployment.toml.tpl: |
+    [server]
+    hostname = "apim-wso2.local"
+    base_path = "https://apim-wso2.local:30443"
+    node_ip = "$env{NODE_IP}"
+
+    [transport.https]
+    port = 9443
+    proxy_port = 30443
+
+    [[apim.gateway.environment]]
+    name = "Default"
+    type = "hybrid"
+    display_in_api_console = true
+    description = "This is a hybrid gateway that handles both production and sandbox token traffic."
+    http_endpoint = "http://api-wso2.local:30080"
+    https_endpoint = "https://api-wso2.local:30443"
+    ws_endpoint = "ws://api-wso2.local:30080"
+    wss_endpoint = "wss://api-wso2.local:30443"
+
+    [apim.key_manager]
+    service_url = "https://localhost:${mgt.transport.https.port}/services/"
+
+    [apim.devportal]
+    url = "https://apim-wso2.local:30443/devportal"
+
+    [super_admin]
+    username = "admin"
+    password = "__ADMIN_PASSWORD__"
+    create_admin_account = true
+
+    [database.shared_db]
+    type = "postgre"
+    url = "jdbc:postgresql://wso2-postgres.apim-wso2.svc.cluster.local:5432/wso2_shared_db"
+    username = "wso2"
+    password = "__DB_PASSWORD__"
+
+    [database.apim_db]
+    type = "postgre"
+    url = "jdbc:postgresql://wso2-postgres.apim-wso2.svc.cluster.local:5432/wso2_apim_db"
+    username = "wso2"
+    password = "__DB_PASSWORD__"
+
+    [user_store]
+    type = "database_unique_id"
+
+    [transport.https.properties]
+    HostnameVerifier = "AllowAll"
+    proxyPort = 30443
+
+    [[apim.jwt.issuer]]
+    name = "Resident Key Manager"
+    issuer = "https://apim-wso2.local:30443/oauth2/token"
+    alias = "https://apim-wso2.local:30443/oauth2/token"
+    jwks_uri = "https://localhost:9443/oauth2/jwks"
+
+    [apim.analytics]
+    enable = false
+
+    [keystore.tls]
+    file_name = "wso2carbon.p12"
+    type = "PKCS12"
+    password = "__KEYSTORE_PASSWORD__"
+    key_password = "__KEYSTORE_PASSWORD__"
+
+    [truststore]
+    file_name = "client-truststore.p12"
+    type = "PKCS12"
+    password = "__TRUSTSTORE_PASSWORD__"

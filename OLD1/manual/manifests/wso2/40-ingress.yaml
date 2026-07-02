@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wso2apim
+  namespace: apim-wso2
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/proxy-redirect-from: "https://localhost:9443"
+    nginx.ingress.kubernetes.io/proxy-redirect-to: "https://apim-wso2.local:30443"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_redirect https://apim-wso2.local:9443 https://apim-wso2.local:30443;
+      sub_filter_once off;
+      sub_filter "https://localhost:9443" "https://apim-wso2.local:30443";
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - apim-wso2.local
+    secretName: wso2apim-tls
+  rules:
+  - host: apim-wso2.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wso2apim
+            port:
+              number: 9443

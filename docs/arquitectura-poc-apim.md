@@ -289,6 +289,102 @@ Estado actual:
 
 ---
 
+## 7.3 Gestión de credenciales de consumidores APIM en Vault
+
+Además de los secretos internos de los productos (keystores, passwords de BD), Vault también almacena las credenciales que los consumidores usan para autenticarse contra los APIMss. Esto evita que las credenciales queden hardcodeadas en scripts, código o herramientas cliente.
+
+### Estructura de secretos de consumidores
+
+```
+kv/apim/
+  ├── wso2/
+  │   └── app-movil/
+  │       ├── client_id      = YTuTDJC9KbBNEF4TabfrRyqCatsa
+  │       └── client_secret  = EMM5QaiQ6YNmQq6wAdX2TOPFYlMa
+  └── gravitee/
+      └── app-movil/
+          └── api_key        = 6bab1d02-6a3b-4eb1-ab1d-026a3bfeb1d1
+```
+
+### Política de acceso — `apim-read`
+
+Se creó una política de solo lectura que limita el acceso exclusivamente a los secretos de APIM:
+
+```hcl
+path "kv/data/apim/*" {
+  capabilities = ["read", "list"]
+}
+path "kv/metadata/apim/*" {
+  capabilities = ["read", "list"]
+}
+```
+
+Con esta política un consumidor **no puede** modificar secretos, acceder a otras rutas de Vault ni ver configuraciones del sistema.
+
+### Token de consumidor
+
+Se creó un token asociado a la política `apim-read`:
+
+| Campo | Valor |
+|---|---|
+| Token | `hvs.CAESIGA5pNCJQe44HRFVqSzjZmTWv81kpJfNdz19RxZ69X5-...` |
+| Políticas | `apim-read`, `default` |
+| TTL | 32 días (límite máximo del sistema Vault) |
+| Expira | 2026-04-26 |
+| Orphan | Sí (no depende del token root) |
+
+> **Nota:** El TTL máximo de 32 días es el límite configurado por defecto en este Vault. Cuando expire, se genera un nuevo token con el comando de la sección siguiente.
+
+### Crear nuevo token cuando expire
+
+```bash
+curl -s \
+  -H "X-Vault-Token: <token-root>" \
+  -X POST "http://172.16.14.185:32106/v1/auth/token/create" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "policies": ["apim-read"],
+    "display_name": "apim-consumer",
+    "no_parent": true,
+    "renewable": false
+  }'
+```
+
+### Leer credenciales desde Vault
+
+**WSO2 — client_id y client_secret:**
+```bash
+curl -s \
+  -H "X-Vault-Token: <token-apim-read>" \
+  "http://172.16.14.185:32106/v1/kv/data/apim/wso2/app-movil" \
+  | python3 -c "import sys,json; d=json.load(sys.stdin)['data']['data']; print('client_id:', d['client_id']); print('client_secret:', d['client_secret'])"
+```
+
+**Gravitee — API key:**
+```bash
+curl -s \
+  -H "X-Vault-Token: <token-apim-read>" \
+  "http://172.16.14.185:32106/v1/kv/data/apim/gravitee/app-movil" \
+  | python3 -c "import sys,json; d=json.load(sys.stdin)['data']['data']; print('api_key:', d['api_key'])"
+```
+
+### Actualizar un secreto
+
+Si se regenera el `client_secret` en WSO2 o la `api_key` en Gravitee, se actualiza en Vault con el token root:
+
+```bash
+# Actualizar solo client_secret de WSO2
+curl -s \
+  -H "X-Vault-Token: <token-root>" \
+  -X PATCH "http://172.16.14.185:32106/v1/kv/data/apim/wso2/app-movil" \
+  -H "Content-Type: application/merge-patch+json" \
+  -d '{"data": {"client_secret": "nuevo-secret"}}'
+```
+
+Vault guarda el historial de versiones automáticamente, por lo que es posible recuperar valores anteriores si es necesario.
+
+---
+
 ## 8. Flujos de consumo de API
 
 ### 8.1 Flujo WSO2 – request completo

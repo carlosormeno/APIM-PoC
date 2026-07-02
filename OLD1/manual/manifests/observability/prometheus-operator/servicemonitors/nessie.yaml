@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nessie
+  namespace: monitoring
+  labels:
+    monitoring: "true"
+spec:
+  namespaceSelector:
+    matchNames:
+      - bi-catalog
+  selector:
+    matchLabels:
+      app: nessie
+  endpoints:
+    - port: mgmt
+      path: /q/metrics
+      interval: 30s

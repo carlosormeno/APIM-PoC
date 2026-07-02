@@ -4,15 +4,19 @@ metadata:
   name: otel-collector
   namespace: monitoring
 spec:
+  type: NodePort
   selector:
     app: otel-collector
   ports:
   - name: otlp-grpc
     port: 4317
     targetPort: 4317
+    nodePort: 30809
   - name: otlp-http
     port: 4318
     targetPort: 4318
+    nodePort: 31947
   - name: metrics
     port: 9464
     targetPort: 9464
+    nodePort: 30239

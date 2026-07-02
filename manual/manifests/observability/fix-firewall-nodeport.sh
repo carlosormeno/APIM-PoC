@@ -21,8 +21,12 @@ ufw allow 30788/tcp comment 'Mage Bronze'
 ufw allow 30789/tcp comment 'Mage Silver'
 ufw allow 30790/tcp comment 'Mage Gold'
 
-# Airflow
-ufw allow 30809/tcp comment 'Airflow Webserver'
+# OTel Collector
+ufw allow 30809/tcp comment 'OTel Collector OTLP gRPC'
+ufw allow 31947/tcp comment 'OTel Collector OTLP HTTP'
+
+# Jaeger
+ufw allow 30686/tcp comment 'Jaeger UI'
 
 # Spark
 ufw allow 30808/tcp comment 'Spark Master UI'
@@ -56,12 +60,10 @@ ufw status verbose
 echo ""
 echo "✨ Configuración completada!"
 echo ""
-echo "📝 Puedes acceder a los servicios desde Windows usando:"
-echo "   - IP Ethernet: 172.16.14.40"
-echo "   - IP WiFi: 10.50.129.187"
-echo ""
 echo "Ejemplos:"
-echo "   Grafana:  http://172.16.14.40:30300"
-echo "   MinIO:    http://172.16.14.40:30901"
-echo "   Airflow:  http://172.16.14.40:30809"
-echo "   Headlamp: http://172.16.14.40:30850"
+echo "   Grafana:   http://<node-ip>:30300"
+echo "   MinIO:     http://<node-ip>:30901"
+echo "   OTel HTTP: http://<node-ip>:31947"
+echo "   OTel gRPC: <node-ip>:30809"
+echo "   Jaeger:    http://<node-ip>:30686"
+echo "   Headlamp:  http://<node-ip>:30850"

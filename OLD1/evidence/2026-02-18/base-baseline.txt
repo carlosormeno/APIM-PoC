@@ -1,0 +1,159 @@
+# Baseline 2026-02-18
+## k3s --version
+k3s version v1.34.3+k3s3 (2975fb09)
+go version go1.24.11
+
+## kubectl version --short
+
+## helm version
+version.BuildInfo{Version:"v4.1.0", GitCommit:"4553a0a96e5205595079b6757236cc6f969ed1b9", GitTreeState:"clean", GoVersion:"go1.25.6", KubeClientVersion:"v1.35"}
+
+## helm list -A
+NAME	NAMESPACE	REVISION	UPDATED	STATUS	CHART	APP VERSION
+
+## kubectl version (fallback)
+Client Version: v1.34.3+k3s3
+Kustomize Version: v5.7.1
+Server Version: v1.34.3+k3s3
+# Paso 5 - Vault (2026-02-18 12:47:33)
+## Referencia
+manual/manifests/vault/EXTERNAL-VAULT.md => Vault externo, no se despliega en este clúster
+
+## Verificaciones
+- namespace vault:
+  namespace vault no existe
+- helm releases vault:
+  sin releases de vault
+- anotaciones vault en deployments:
+  no detectadas
+# Despliegue Vault + Headlamp (2026-02-18 12:54:15)
+helm upgrade --install vault hashicorp/vault -n vault -f manual/vault/vault-values.yaml
+helm upgrade --install headlamp headlamp/headlamp -n headlamp --set service.type=NodePort
+
+## Releases
+NAME 	NAMESPACE	REVISION	UPDATED                                	STATUS	CHART       	APP VERSION
+vault	vault    	2       	2026-02-18 12:53:47.276192747 -0500 -05	failed	vault-0.32.0	1.21.2     
+NAME    	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART          	APP VERSION
+headlamp	headlamp 	1       	2026-02-18 12:52:48.236930642 -0500 -05	deployed	headlamp-0.40.0	0.40.0     
+
+## Endpoints
+Vault UI: http://172.16.14.54:30270
+Headlamp: http://172.16.14.54:32031
+
+# Estado final Vault + Headlamp (2026-02-18 12:54:53)
+NAME 	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART       	APP VERSION
+vault	vault    	1       	2026-02-18 12:54:33.537843103 -0500 -05	deployed	vault-0.32.0	1.21.2     
+NAME    	NAMESPACE	REVISION	UPDATED                                	STATUS  	CHART          	APP VERSION
+headlamp	headlamp 	1       	2026-02-18 12:52:48.236930642 -0500 -05	deployed	headlamp-0.40.0	0.40.0     
+Vault UI: http://172.16.14.54:32106
+Headlamp: http://172.16.14.54:32031
+
+# Vault cierre operativo (2026-02-18 14:15:57)
+- vault initialized/unsealed: OK
+- kubernetes auth enabled/configured: OK
+- policies: apim-gravitee, apim-wso2, apim-kong
+- roles: apim-gravitee, apim-wso2, apim-kong
+- smoke injector: pod apim-gravitee/vault-smoke -> token=ok-from-vault
+
+Key                     Value
+---                     -----
+Seal Type               shamir
+Initialized             true
+Sealed                  false
+Total Shares            5
+Threshold               3
+Version                 1.21.2
+Build Date              2026-01-06T08:33:05Z
+Storage Type            raft
+Cluster Name            vault-cluster-25642928
+Cluster ID              ad8d406d-d292-f43d-5a39-5c35a6c95fe2
+Removed From Cluster    false
+HA Enabled              true
+HA Cluster              https://vault-0.vault-internal:8201
+HA Mode                 active
+Active Since            2026-02-18T19:15:07.675239239Z
+Raft Committed Index    70
+Raft Applied Index      70
+
+# Paso 6 observabilidad OK (2026-02-18 14:25:36)
+NAME                                     READY   STATUS    RESTARTS   AGE
+alertmanager-receiver-6b69f4444d-tcf6x   1/1     Running   0          4m29s
+grafana-6f8dc64cf7-br6c4                 1/1     Running   0          4m29s
+loki-7b79d9dfbb-b669c                    1/1     Running   0          72s
+otel-collector-599989c868-7wcw8          1/1     Running   0          72s
+prometheus-operator-5447849df6-qflzc     1/1     Running   0          4m44s
+prometheus-prometheus-k8s-0              2/2     Running   0          72s
+NAME                            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/alertmanager-receiver   ClusterIP   10.43.79.17     <none>        5000/TCP                     4m29s
+service/grafana                 NodePort    10.43.168.104   <none>        3000:30300/TCP               4m29s
+service/loki-stack              ClusterIP   10.43.179.146   <none>        3100/TCP                     4m28s
+service/otel-collector          ClusterIP   10.43.133.120   <none>        4317/TCP,4318/TCP,9464/TCP   4m28s
+service/prometheus-k8s          ClusterIP   10.43.86.65     <none>        9090/TCP                     4m30s
+service/prometheus-operated     ClusterIP   None            <none>        9090/TCP                     4m29s
+service/prometheus-operator     ClusterIP   None            <none>        8080/TCP                     4m44s
+
+NAME                                CLASS   HOSTS           ADDRESS        PORTS     AGE
+ingress.networking.k8s.io/grafana   nginx   grafana.local   10.43.164.16   80, 443   4m29s
+
+# Paso 7 Grafana Ingress HTTPS OK (2026-02-18 14:31:21)
+Verificacion: curl -k --resolve grafana.local:30443:172.16.14.54 https://grafana.local:30443
+Resultado esperado: HTTP 302 -> /login
+Nota: en este entorno ingress-nginx expone 80/443 por NodePort (30080/30443).
+
+# Paso 8 backends PoC OK (2026-02-18 14:36:24)
+smoke interno:
+- svc-fast => HTTP 200
+- svc-slow => HTTP 200 (delay ~200ms)
+- svc-error => HTTP 500
+NAME                             READY   STATUS    RESTARTS   AGE
+pod/svc-error-686f7b4b64-4hzw5   1/1     Running   0          115s
+pod/svc-fast-75888c785b-4zmj4    1/1     Running   0          116s
+pod/svc-slow-6d4f49c486-mvtn9    1/1     Running   0          116s
+
+NAME                TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+service/svc-error   ClusterIP   10.43.244.17   <none>        80/TCP    115s
+service/svc-fast    ClusterIP   10.43.1.97     <none>        80/TCP    116s
+service/svc-slow    ClusterIP   10.43.214.78   <none>        80/TCP    116s
+
+# Paso 9 k6/loadgen OK (2026-02-18 14:41:27)
+namespace poc-loadgen validado
+k6 smoke ejecutado contra svc-fast.poc-backends.svc.cluster.local
+resultado: checks_succeeded=100% , http_req_failed=0%
+
+# Paso 10 headroom y regla operativa OK (2026-02-18 14:46:46)
+kubectl top nodes:
+NAME            CPU(cores)   CPU(%)   MEMORY(bytes)   MEMORY(%)   
+arqui.sandbox   1049m        6%       5195Mi          32%         
+
+free -h:
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       4.1Gi       3.0Gi       383Mi       9.0Gi        11Gi
+Swap:          4.0Gi          0B       4.0Gi
+
+verificacion APIM activos:
+- apim-gravitee pods=0
+- apim-wso2 pods=0
+- apim-kong pods=0
+conclusion: headroom disponible y sin APIM desplegado actualmente
+
+# WSO2 Paso 1 instalacion OK (2026-02-18 14:57:01)
+- vault secrets creados: kv/apim/wso2/{db,postgres,keystore,truststore}
+- wso2 postgres y apim running
+- ingress management: https://apim-wso2.local:30443 -> 302
+- ingress gateway: https://api-wso2.local:30443 -> 200
+NAME                                 READY   STATUS    RESTARTS   AGE
+pod/wso2-postgres-74759949b9-gkfvd   2/2     Running   0          5m59s
+pod/wso2apim-68c8c7cdb9-gvzfj        2/2     Running   0          5m28s
+
+NAME                    TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                      AGE
+service/wso2-postgres   ClusterIP   10.43.29.169    <none>        5432/TCP                     5m59s
+service/wso2apim        ClusterIP   10.43.106.116   <none>        9443/TCP,8243/TCP,8280/TCP   5m59s
+
+NAME                                         CLASS   HOSTS             ADDRESS        PORTS     AGE
+ingress.networking.k8s.io/wso2apim           nginx   apim-wso2.local   10.43.164.16   80, 443   5m59s
+ingress.networking.k8s.io/wso2apim-gateway   nginx   api-wso2.local    10.43.164.16   80, 443   5m59s
+
+# WSO2 ajuste redirect/login (2026-02-18 17:28:24)
+- Ingress wso2apim: rewrite de redirects localhost->apim-wso2.local:30443
+- Rollout estable de wso2apim completado
+- Verificacion: / -> 302 a https://apim-wso2.local:30443/publisher/

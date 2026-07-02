@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gravitee-portal
+  namespace: apim-gravitee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gravitee-portal
+  template:
+    metadata:
+      labels:
+        app: gravitee-portal
+    spec:
+      containers:
+      - name: portal
+        image: graviteeio/apim-portal-ui:4.10.3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MGMT_API_URL
+          value: "http://gravitee-management-api.apim-gravitee.svc.cluster.local:8083"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi

@@ -196,7 +196,7 @@ helm upgrade --install vault-agent-injector hashicorp/vault \\
 > Ajustar service accounts, namespaces y paths reales según tu entorno.
 > Si ya existe Vault corporativo, omite instalación/init y usa el endpoint provisto.
 
-## Paso 6) Observabilidad (Prometheus + Grafana + Loki + OpenTelemetry Collector)
+## Paso 6) Observabilidad (Prometheus + Grafana + Loki + OpenTelemetry Collector + Jaeger)
 
 **Modo manual (YAML):** usar manifests en `manual/manifests/observability/`.
 
@@ -213,6 +213,7 @@ kubectl apply -f manual/manifests/observability/grafana/
 kubectl apply -f manual/manifests/observability/loki-configmap.yaml
 kubectl apply -f manual/manifests/observability/loki-deployment.yaml
 kubectl apply -f manual/manifests/observability/loki-service.yaml
+kubectl apply -f manual/manifests/observability/jaeger/
 kubectl apply -f manual/manifests/observability/otel-configmap.yaml
 kubectl apply -f manual/manifests/observability/otel-deployment.yaml
 kubectl apply -f manual/manifests/observability/otel-service.yaml
@@ -220,7 +221,14 @@ kubectl apply -f manual/manifests/observability/otel-service.yaml
 
 Nota: no aplicar `manual/manifests/observability/prometheus/` cuando se usa el operator.
 
-> Luego afinamos los manifests del collector para exporters (Prometheus/OTLP/Loki/otros) según lo que exponga cada APIM.
+> Luego afinamos los manifests del collector para exporters (Prometheus/OTLP/Loki/Jaeger/otros) según lo que exponga cada APIM.
+
+Accesos NodePort de trazas:
+- OTel Collector gRPC: `<node-ip>:30809`
+- OTel Collector HTTP: `http://<node-ip>:31947`
+- Jaeger UI: `http://<node-ip>:30686`
+
+Nota: `jaeger` queda en modo `all-in-one` con almacenamiento en memoria, útil para demos y pruebas, no para persistencia.
 
 ---
 

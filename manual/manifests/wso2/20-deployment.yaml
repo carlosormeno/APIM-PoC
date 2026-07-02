@@ -103,6 +103,8 @@ spec:
           mountPath: /home/wso2carbon/wso2-config-volume
         - name: keystores
           mountPath: /home/wso2carbon/wso2-config-volume/repository/resources/security
+        - name: wso2-access-logs
+          mountPath: /home/wso2carbon/wso2am-4.6.0/repository/logs
         resources:
           requests:
             cpu: "2000m"
@@ -131,6 +133,23 @@ spec:
             scheme: HTTPS
           initialDelaySeconds: 60
           periodSeconds: 20
+      - name: filebeat-sidecar
+        image: docker.elastic.co/beats/filebeat:8.13.4
+        args: ["-c", "/etc/filebeat/filebeat.yml", "-e", "--strict.perms=false"]
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        volumeMounts:
+        - name: filebeat-config
+          mountPath: /etc/filebeat/filebeat.yml
+          subPath: filebeat.yml
+        - name: wso2-access-logs
+          mountPath: /wso2-logs
+          readOnly: true
       volumes:
       - name: config-template
         configMap:
@@ -139,3 +158,8 @@ spec:
         emptyDir: {}
       - name: keystores
         emptyDir: {}
+      - name: wso2-access-logs
+        emptyDir: {}
+      - name: filebeat-config
+        configMap:
+          name: wso2-filebeat-config
